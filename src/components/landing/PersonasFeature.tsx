@@ -3,87 +3,46 @@
 import { useState, useRef } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { Sparkles, User, Wand2, Link as LinkIcon, Image as ImageIcon, Play, ChevronLeft, ChevronRight } from "lucide-react";
-import Image, { StaticImageData } from "next/image";
-
-// Persona Avatars (new AI-generated)
-import personaAvatar1 from "../../assets/thumbnails/persona_avatar_new_1.png";
-import personaAvatar2 from "../../assets/thumbnails/persona_avatar_new_2.png";
-import personaAvatar3 from "../../assets/thumbnails/persona_avatar_new_3.png";
-import personaAvatar4 from "../../assets/thumbnails/persona_avatar_new_4.png";
-import personaAvatar5 from "../../assets/thumbnails/persona_avatar_new_5.png";
-
-// Persona Results
-import personaResult1 from "../../assets/thumbnails/persona_result_new_1.png";
-import personaResult2 from "../../assets/thumbnails/persona_result_new_2.png";
-import personaResult3 from "../../assets/thumbnails/persona_result_new_3.png";
-import personaResult4 from "../../assets/thumbnails/persona_result_new_4.png";
-import personaResult5 from "../../assets/thumbnails/persona_result_new_5.png";
-import personaResult6 from "../../assets/thumbnails/persona_result_new_6.png";
-
-// Style Tab Assets
-import styleReference from "../../assets/thumbnails/style_reference_new_1.png";
-import styleResult1 from "../../assets/thumbnails/style_result_new_1.png";
-import styleResult2 from "../../assets/thumbnails/style_result_new_2.png";
-import styleResult3 from "../../assets/thumbnails/style_result_new_3.png";
-import styleResult4 from "../../assets/thumbnails/style_result_new_4.png";
-
-// Prompt Tab Assets
-import promptResult1 from "../../assets/thumbnails/prompt_result_new_1.png";
-import promptResult2 from "../../assets/thumbnails/prompt_result_new_2.png";
-import promptResult3 from "../../assets/thumbnails/prompt_result_new_3.png";
-
-// Link Tab Assets
-import linkPreview from "../../assets/thumbnails/link_preview_new_1.png";
-import linkResult1 from "../../assets/thumbnails/link_result_new_1.png";
-import linkResult2 from "../../assets/thumbnails/link_result_new_2.png";
-import linkResult3 from "../../assets/thumbnails/link_result_new_3.png";
-
-// Carousel Assets
-import carouselThumb1 from "../../assets/thumbnails/carousel_thumb_1.png";
-import carouselThumb2 from "../../assets/thumbnails/carousel_thumb_2.png";
-import carouselThumb3 from "../../assets/thumbnails/carousel_thumb_3.png";
-import carouselThumb4 from "../../assets/thumbnails/carousel_thumb_4.png";
-import carouselThumb5 from "../../assets/thumbnails/carousel_thumb_5.png";
-import carouselThumb6 from "../../assets/thumbnails/carousel_thumb_6.png";
+import Image from "next/image";
 
 type Tab = "persona" | "style" | "prompt" | "link";
 
-// Sample thumbnail images
+// Sample thumbnail images - using public folder paths
 const SAMPLE_THUMBNAILS = {
     persona: {
         avatars: [
-            personaAvatar1,
-            personaAvatar2,
-            personaAvatar3,
-            personaAvatar4,
-            personaAvatar5,
+            "/thumbnails/persona_avatar_new_1.jpg",
+            "/thumbnails/persona_avatar_new_2.jpg",
+            "/thumbnails/persona_avatar_new_3.jpg",
+            "/thumbnails/persona_avatar_new_4.jpg",
+            "/thumbnails/persona_avatar_new_5.jpg",
         ],
         results: [
-            personaResult1,
-            personaResult2,
+            "/thumbnails/persona_result_new_1.jpg",
+            "/thumbnails/persona_result_new_2.jpg",
         ]
     },
     style: {
-        reference: styleReference,
+        reference: "/thumbnails/style_reference_new_1.jpg",
         results: [
-            styleResult1,
-            styleResult2,
+            "/thumbnails/style_result_new_1.jpg",
+            "/thumbnails/style_result_new_2.jpg",
         ]
     },
     prompt: {
-        result: promptResult1,
-        variations: [promptResult2, promptResult3],
+        result: "/thumbnails/prompt_result_new_1.jpg",
+        variations: ["/thumbnails/prompt_result_new_2.jpg", "/thumbnails/prompt_result_new_3.jpg"],
     },
     link: {
-        videoThumb: linkPreview,
-        result: linkResult1,
-        variations: [linkResult2, linkResult3],
+        videoThumb: "/thumbnails/link_preview_new_1.png",
+        result: "/thumbnails/link_result_new_1.jpg",
+        variations: ["/thumbnails/link_result_new_2.jpg", "/thumbnails/link_result_new_3.jpg"],
     },
     carousel: {
-        persona: [personaResult1, personaResult2, personaResult3, personaResult4, personaResult5, personaResult6],
-        style: [styleResult1, carouselThumb1, carouselThumb2, styleResult4, styleResult2, styleResult3],
-        prompt: [promptResult1, promptResult2, promptResult3, carouselThumb3, carouselThumb4, carouselThumb5],
-        link: [linkResult1, linkResult2, linkResult3, carouselThumb1, carouselThumb4, carouselThumb6],
+        persona: ["/thumbnails/persona_result_new_1.jpg", "/thumbnails/persona_result_new_2.jpg", "/thumbnails/persona_result_new_3.jpg", "/thumbnails/persona_result_new_4.jpg", "/thumbnails/persona_result_new_5.jpg", "/thumbnails/persona_result_new_6.jpg"],
+        style: ["/thumbnails/style_result_new_1.jpg", "/thumbnails/carousel_thumb_1.jpg", "/thumbnails/carousel_thumb_2.jpg", "/thumbnails/style_result_new_4.jpg", "/thumbnails/style_result_new_2.jpg", "/thumbnails/style_result_new_3.jpg"],
+        prompt: ["/thumbnails/prompt_result_new_1.jpg", "/thumbnails/prompt_result_new_2.jpg", "/thumbnails/prompt_result_new_3.jpg", "/thumbnails/carousel_thumb_3.jpg", "/thumbnails/carousel_thumb_4.jpg", "/thumbnails/carousel_thumb_5.jpg"],
+        link: ["/thumbnails/link_result_new_1.jpg", "/thumbnails/link_result_new_2.jpg", "/thumbnails/link_result_new_3.jpg", "/thumbnails/carousel_thumb_1.jpg", "/thumbnails/carousel_thumb_4.jpg", "/thumbnails/carousel_thumb_6.jpg"],
     }
 };
 
@@ -559,7 +518,7 @@ function LinkVisual() {
 // Thumbnail Carousel Component
 const DURATIONS = ["5:42", "8:15", "12:34", "6:27", "14:08", "9:53"];
 
-function ThumbnailCarousel({ thumbnails, activeTab }: { thumbnails: StaticImageData[]; activeTab: Tab }) {
+function ThumbnailCarousel({ thumbnails, activeTab }: { thumbnails: string[]; activeTab: Tab }) {
     const scrollRef = useRef<HTMLDivElement>(null);
 
     const scroll = (direction: "left" | "right") => {

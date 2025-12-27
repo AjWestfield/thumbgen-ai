@@ -39,6 +39,14 @@ yarn-error.log*
 # generated assets
 /src/assets/thumbnails
 
+# large thumbnail images (use external CDN in production)
+public/thumbnails/*.jpg
+public/thumbnails/*.png
+public/images/thumbnail-*.jpg
+public/images/thumbnail-*.png
+*.log
+.claude/
+
 # typescript
 *.tsbuildinfo
 next-env.d.ts

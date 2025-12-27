@@ -1,0 +1,21 @@
+<svg width="100" height="100" viewBox="0 0 100 100" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <!-- Main red rounded square background -->
+  <rect width="100" height="100" rx="20" fill="#DC2626"/>
+
+  <!-- Play button shape with integrated lightning bolt -->
+  <path d="M35 25L75 50L35 75V25Z" fill="white" opacity="0.3"/>
+
+  <!-- Lightning bolt / Zap element -->
+  <path d="M55 20L35 48H50L42 80L72 45H55L55 20Z" fill="white"/>
+
+  <!-- Subtle glow effect -->
+  <defs>
+    <filter id="glow" x="-20%" y="-20%" width="140%" height="140%">
+      <feGaussianBlur stdDeviation="2" result="coloredBlur"/>
+      <feMerge>
+        <feMergeNode in="coloredBlur"/>
+        <feMergeNode in="SourceGraphic"/>
+      </feMerge>
+    </filter>
+  </defs>
+</svg>

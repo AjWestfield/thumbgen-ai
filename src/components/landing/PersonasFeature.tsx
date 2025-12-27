@@ -67,7 +67,7 @@ export function PersonasFeature() {
         persona: "Train your own custom models & consistently integrate them into any of your thumbnails.",
         style: "Replicate any visual style instantly. Just upload a reference and let AI do the rest.",
         prompt: "Describe what you envision and watch it come to life with pixel-perfect accuracy.",
-        link: "Love a thumbnail you've seen? Paste the video link & Pikzels will help you create something even better.",
+        link: "Love a thumbnail you've seen? Paste the video link & ThumbZap will help you create something even better.",
     };
 
     return (
@@ -505,7 +505,7 @@ function LinkVisual() {
                     unoptimized
                 />
                 <div className="absolute top-2 left-2 px-2 py-0.5 bg-red-600 rounded text-[10px] text-white font-bold shadow-lg">
-                    Pikzels
+                    ThumbZap
                 </div>
                 <div className="absolute bottom-2 right-2 px-1.5 py-0.5 bg-black/70 rounded text-[10px] text-white">
                     YouTube 101

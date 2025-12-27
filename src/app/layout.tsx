@@ -1,6 +1,10 @@
 import type { Metadata } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
 import "./globals.css";
+import { ClerkProvider } from "@clerk/nextjs";
+import { ConvexClientProvider } from "@/components/ConvexClientProvider";
+import { NavbarProvider } from "@/components/NavbarContext";
+import { Navbar } from "@/components/landing/Navbar";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -13,8 +17,8 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "AI Thumbnail Generator - Viral YouTube Thumbnails",
-  description: "Generate high-CTR YouTube thumbnails with AI. Chat with the generator and upload references.",
+  title: "ThumbZap - AI Thumbnail Generator | Viral YouTube Thumbnails in Seconds",
+  description: "ThumbZap generates high-CTR YouTube thumbnails with AI. Create viral thumbnails in seconds with face swap, style replication, and more.",
 };
 
 export default function RootLayout({
@@ -27,7 +31,14 @@ export default function RootLayout({
       <body
         className={`${geistSans.variable} ${geistMono.variable} antialiased`}
       >
-        {children}
+        <ClerkProvider>
+          <ConvexClientProvider>
+            <NavbarProvider>
+              <Navbar />
+              {children}
+            </NavbarProvider>
+          </ConvexClientProvider>
+        </ClerkProvider>
       </body>
     </html>
   );

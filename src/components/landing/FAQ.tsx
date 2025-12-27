@@ -8,12 +8,12 @@ import {
 export function FAQ() {
     const faqs = [
         {
-            question: "What is ThumbGen AI?",
-            answer: "ThumbGen AI is an advanced image generation platform specifically fine-tuned for YouTube thumbnails. It understands viral compositions, high-contrast text placement, and emotional expressions that drive clicks."
+            question: "What is ThumbZap?",
+            answer: "ThumbZap is an advanced image generation platform specifically fine-tuned for YouTube thumbnails. It understands viral compositions, high-contrast text placement, and emotional expressions that drive clicks."
         },
         {
-            question: "Why choose ThumbGen over Midjourney?",
-            answer: "While Midjourney creates beautiful art, ThumbGen creates marketing assets. We optimize for CTR (Click Through Rate) with specific training on successful YouTube videos, face-swapping capabilities, and text integration."
+            question: "Why choose ThumbZap over Midjourney?",
+            answer: "While Midjourney creates beautiful art, ThumbZap creates marketing assets. We optimize for CTR (Click Through Rate) with specific training on successful YouTube videos, face-swapping capabilities, and text integration."
         },
         {
             question: "Do credits expire?",

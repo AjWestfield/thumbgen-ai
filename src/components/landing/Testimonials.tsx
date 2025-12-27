@@ -15,28 +15,28 @@ export function Testimonials() {
         {
             name: "Rex Freiberger",
             role: "Creator (US)",
-            text: "I've tested several AI image generators from Midjourney to DallE and Pikzels is one of the most accurate thumbnail creators on the web.",
+            text: "I've tested several AI image generators from Midjourney to DallE and ThumbZap is one of the most accurate thumbnail creators on the web.",
             avatar: "/images/avatar-rex.png",
             initials: "RF"
         },
         {
             name: "Rico Griek",
             role: "Channel Manager",
-            text: "Pikzels made us $60K in 1 month! It was always difficult to make thumbnails that aligned with our vision. I was skeptical but it delivered.",
+            text: "ThumbZap made us $60K in 1 month! It was always difficult to make thumbnails that aligned with our vision. I was skeptical but it delivered.",
             avatar: "/images/avatar-rico.png",
             initials: "RG"
         },
         {
             name: "Sidharth Das",
             role: "Small YouTuber",
-            text: "Pikzels is a god send. I have been using it for a month now and honestly the results are super impressive. It saves me the headache.",
+            text: "ThumbZap is a god send. I have been using it for a month now and honestly the results are super impressive. It saves me the headache.",
             avatar: "/images/avatar-sidharth.png",
             initials: "SD"
         },
     ];
 
     return (
-        <section className="relative overflow-hidden border-t border-zinc-900 bg-black py-24">
+        <section className="relative overflow-hidden bg-black py-24">
             {/* Background decoration */}
             <div className="absolute top-0 right-0 -z-10 h-[500px] w-[500px] translate-x-1/2 -translate-y-1/2 rounded-full bg-primary/5 blur-[120px]" />
 

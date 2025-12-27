@@ -1,27 +1,28 @@
 import { cn } from "@/lib/utils";
 import Image from "next/image";
 
-// Array of local images we downloaded
-// Array of local images with mock view counts and titles
+// Array of local images with titles matching pikzels.com
 const thumbnails = [
-    { src: "/images/marquee/thumb-1.webp", views: "1.2M views", title: "I Spent 100 Hours in Minecraft Hardcore" },
-    { src: "/images/marquee/thumb-2.webp", views: "850K views", title: "The Truth About AI Generated Art" },
-    { src: "/images/marquee/thumb-3.webp", views: "2.1M views", title: "Building the Ultimate Gaming Setup" },
-    { src: "/images/marquee/thumb-4.webp", views: "450K views", title: "Why This Camera Changed Everything" },
-    { src: "/images/marquee/thumb-5.webp", views: "1.8M views", title: "Surviving 24 Hours in the Desert" },
-    { src: "/images/marquee/thumb-6.webp", views: "920K views", title: "Top 10 Hidden Features in iOS 18" },
-    { src: "/images/marquee/thumb-7.webp", views: "3.4M views", title: "I Ate at the Worst Review Restaurant" },
-    { src: "/images/marquee/thumb-8.webp", views: "125K views", title: "Coding a SaaS in 1 Week" },
-    { src: "/images/marquee/thumb-9.webp", views: "670K views", title: "The End of an Era: Final Update" },
-    { src: "/images/marquee/thumb-10.webp", views: "1.5M views", title: "Unboxing the $10,000 Apple Vision Pro" },
-    { src: "/images/marquee/thumb-11.webp", views: "2.9M views", title: "How to Grow Your Channel Fast" },
-    { src: "/images/marquee/thumb-12.webp", views: "580K views", title: "Reviewing Your Terrible Setups" },
-    { src: "/images/marquee/thumb-13.webp", views: "1.1M views", title: "MrBeast's Secret Strategy Exposed" },
-    { src: "/images/marquee/thumb-14.webp", views: "340K views", title: "Solving the Hardest Riddle" },
-    { src: "/images/marquee/thumb-15.webp", views: "2.3M views", title: "Camped in a Haunted Forest" },
-    { src: "/images/marquee/thumb-16.webp", views: "980K views", title: "Custom Keyboard Build ASMR" },
-    { src: "/images/marquee/thumb-17.webp", views: "1.7M views", title: "The Fastest Car in the World" },
-    { src: "/images/marquee/thumb-18.webp", views: "4.2M views", title: "100 Mystery Buttons: Only 1 Escapes" },
+    // Top row (1-9)
+    { src: "/images/marquee/thumb-1.webp", views: "4.5M views", title: "The Race That Changed Formula 1 FOREVER.." },
+    { src: "/images/marquee/thumb-2.webp", views: "800K views", title: "SECRET Tattoos Footballers Don't Talk About" },
+    { src: "/images/marquee/thumb-3.webp", views: "3.7M views", title: "THE GREATEST FC 25 PACK OPENING SO FAR!" },
+    { src: "/images/marquee/thumb-4.webp", views: "2.2M views", title: "How One Person Destroyed 239 Lives" },
+    { src: "/images/marquee/thumb-5.webp", views: "1.1M views", title: "Millionaires VS Billionaires - What Are The Differences?" },
+    { src: "/images/marquee/thumb-6.webp", views: "400K views", title: "How Samuel Onuha Sniffed His Way to Prison" },
+    { src: "/images/marquee/thumb-7.webp", views: "1.3M views", title: "Trump's Tariff Plan Explained" },
+    { src: "/images/marquee/thumb-8.webp", views: "1M views", title: "They Just Ripped Off – A Simple Mistake with Dire.." },
+    { src: "/images/marquee/thumb-9.webp", views: "700K views", title: "The Unluckiest Racer of ALL TIME" },
+    // Bottom row (10-18)
+    { src: "/images/marquee/thumb-10.webp", views: "100K views", title: "This AI Image Generator Blew my Mind!" },
+    { src: "/images/marquee/thumb-11.webp", views: "1.5M views", title: "Level 1 to 100 Mind F*ck Paradox to Fall Asleep to" },
+    { src: "/images/marquee/thumb-12.webp", views: "400K views", title: "Iman Gadzhi Has Completely Lost His Mind.." },
+    { src: "/images/marquee/thumb-13.webp", views: "3.6M views", title: "Extreme Stories of Revenge That Went Too Far - Part 5" },
+    { src: "/images/marquee/thumb-14.webp", views: "900K views", title: "The Unfathomable Wealth of Pablo Escobar" },
+    { src: "/images/marquee/thumb-15.webp", views: "1.4M views", title: "Dubai's Insane $100B Branded Megaprojects" },
+    { src: "/images/marquee/thumb-16.webp", views: "1.5M views", title: "How History's Biggest Idiot Accidentally Became a.." },
+    { src: "/images/marquee/thumb-17.webp", views: "3.4M views", title: "The Satisfying Downfall of Ashton Hall" },
+    { src: "/images/marquee/thumb-18.webp", views: "500K views", title: "JE TRANSFÈRE MBAPPÉ À L'AS BONDY !" },
 ];
 
 // Split into 2 rows
@@ -56,6 +57,7 @@ function MarqueeRow({ images, reverse = false, duration = 40 }: { images: Marque
                                 src={item.src}
                                 alt={item.title}
                                 fill
+                                sizes="320px"
                                 className="object-cover"
                             />
                         </div>
@@ -86,10 +88,10 @@ export function Marquee() {
             }}
         >
 
-            {/* Marquee Container with increased scaling/spacing if needed */}
+            {/* Marquee Container */}
             <div className="flex flex-col gap-10 scale-100">
-                <MarqueeRow images={row1} duration={60} />
-                <MarqueeRow images={row2} reverse duration={60} />
+                <MarqueeRow images={row1} duration={100} />
+                <MarqueeRow images={row2} reverse duration={100} />
             </div>
         </div>
     );

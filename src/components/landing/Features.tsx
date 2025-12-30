@@ -58,28 +58,28 @@ export function Features() {
         {
             title: "The Race That Changed Formula 1 FOREVER..",
             views: "4.5M views",
-            image: "/images/thumbnail-f1.png",
+            image: "/images/marquee/thumb-1.webp",
             time: "2 days ago",
             duration: "18:42"
         },
         {
             title: "SECRET Tattoos Footballers Don't Talk About",
             views: "800K views",
-            image: "/images/thumbnail-football.png",
+            image: "/images/marquee/thumb-2.webp",
             time: "5 days ago",
             duration: "12:15"
         },
         {
             title: "THE GREATEST FC 25 PACK OPENING SO FAR!",
             views: "3.7M views",
-            image: "/images/thumbnail-fc25.png",
+            image: "/images/marquee/thumb-3.webp",
             time: "14 hours ago",
             duration: "24:39"
         },
         {
             title: "How One Person Destroyed 239 Lives",
             views: "2.2M views",
-            image: "/images/thumbnail-documentary.png",
+            image: "/images/marquee/thumb-4.webp",
             time: "1 month ago",
             duration: "45:10"
         },

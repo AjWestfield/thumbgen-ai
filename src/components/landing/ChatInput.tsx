@@ -1,7 +1,6 @@
 "use client";
 
 import { useState, useRef, useEffect } from "react";
-import Image from "next/image";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
 import { Paperclip, ArrowUp, Image as ImageIcon, X, Youtube, Upload, Link2, Plus } from "lucide-react";
@@ -609,19 +608,6 @@ export function ChatInput({
                             )}
                         </div>
 
-                        {/* Model Indicator */}
-                        <div className="flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-zinc-800/50 border border-zinc-700/50">
-                            <Image
-                                src="/logo.jpg"
-                                alt="Nano Banana"
-                                width={14}
-                                height={14}
-                                className="h-3.5 w-3.5 rounded-sm"
-                            />
-                            <span className="text-xs text-zinc-400">
-                                Nano Banana Pro
-                            </span>
-                        </div>
                     </div>
 
                     <Button

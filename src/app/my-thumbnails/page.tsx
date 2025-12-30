@@ -237,14 +237,17 @@ export default function MyThumbnailsPage() {
     try {
       const improvementPrompt = `Improve this YouTube thumbnail by: ${improvements.join('. ')}. Make the improvements while maintaining the core subject and composition.`;
 
-      const response = await fetch('/api/generate-openai', {
+      const response = await fetch('/api/generate', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
           mode: 'edit',
           prompt: improvementPrompt,
           images: [selectedThumbnail.imageUrl],
-          size: '1536x1024',
+          hasReferenceImage: false,
+          aspectRatio: '16:9',
+          resolution: '2k',
+          outputFormat: 'png',
         }),
       });
 
@@ -254,9 +257,9 @@ export default function MyThumbnailsPage() {
         await saveThumbnail({
           imageUrl: data.imageUrl,
           prompt: `[Improved] ${selectedThumbnail.prompt}`,
-          model: 'gpt-image-1.5',
+          model: 'Nano Banana Pro',
           aspectRatio: '16:9',
-          resolution: '1536x1024',
+          resolution: '2k',
         });
 
         // Update the selected thumbnail to show the new image

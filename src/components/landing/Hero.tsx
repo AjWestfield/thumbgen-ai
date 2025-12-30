@@ -2,7 +2,6 @@
 
 import { useState, useRef, useEffect, useCallback } from "react";
 import { useSearchParams } from "next/navigation";
-import Image from "next/image";
 import { ChatInput, type ReferenceImage } from "./ChatInput";
 import { Marquee } from "./Marquee";
 import { Sparkles } from "lucide-react";
@@ -13,7 +12,6 @@ import { searchYouTube, type YouTubeVideo, type GeneratedMetadata } from "@/lib/
 import { useMutation, useQuery } from "convex/react";
 import { api } from "../../../convex/_generated/api";
 import { Id } from "../../../convex/_generated/dataModel";
-import { cn } from "@/lib/utils";
 import { useAuth } from "@clerk/nextjs";
 
 // Pre-upload state for instant UX
@@ -23,8 +21,6 @@ interface PreUploadState {
     error: string | null;
 }
 
-// Model options
-type ModelType = 'nano-banana' | 'gpt-image-1.5';
 type GenerationMode = 'edit' | 'generate';
 
 // Helper to upload file to Convex storage and get the public URL
@@ -77,10 +73,6 @@ export function Hero() {
     // Credit system - only query if signed in (skip query when not authenticated)
     const creditInfo = useQuery(api.users.hasCredits, isSignedIn ? undefined : "skip");
 
-    // Model selection state
-    const [selectedModel, setSelectedModel] = useState<ModelType>('gpt-image-1.5');
-    const didWarmGptImageRoute = useRef(false);
-
     // Pre-upload state for instant UX - uploads happen in background as soon as user selects image
     // Using refs to track latest state for use in closures
     const imagePreUploadRef = useRef<PreUploadState>({ status: 'idle', url: null, error: null });
@@ -92,15 +84,6 @@ export function Hero() {
     const setReferencePreUpload = (state: PreUploadState) => {
         referencePreUploadRef.current = state;
     };
-
-    // Dev-only: warm the GPT image route so the first generation isn't blocked on Next's on-demand compilation.
-    useEffect(() => {
-        if (process.env.NODE_ENV !== 'development') return;
-        if (selectedModel !== 'gpt-image-1.5') return;
-        if (didWarmGptImageRoute.current) return;
-        didWarmGptImageRoute.current = true;
-        fetch('/api/generate-openai').catch(() => {});
-    }, [selectedModel]);
 
     // Get edit parameters from URL (for editing existing thumbnails from My Thumbnails)
     const editImageUrl = searchParams.get('editImage');
@@ -382,7 +365,7 @@ export function Hero() {
             };
 
             let generateResult;
-            let modelUsed = selectedModel === 'gpt-image-1.5' ? 'GPT Image 1.5' : 'Nano Banana Pro';
+            let modelUsed = 'Nano Banana Pro';
 
             if (faceSwapMode && referenceUrl && userImageUrl) {
                 // Face Swap Mode: Call the face swap API
@@ -404,31 +387,6 @@ export function Hero() {
 
                 if (!generateResult.success) {
                     throw new Error(generateResult.error || 'Failed to swap face');
-                }
-            } else if (selectedModel === 'gpt-image-1.5') {
-                // GPT Image 1.5 API
-                // Build images array (API expects array, not single image)
-                const gptImages = userImageUrl ? [userImageUrl] : undefined;
-                console.log(`[GPT Image 1.5] Mode: ${generationMode}, Prompt: "${prompt.substring(0, 50)}...", images: ${gptImages?.length || 0}, hasReference: ${!!referenceUrl}`);
-
-                const generateResponse = await fetch('/api/generate-openai', {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json',
-                    },
-                    body: JSON.stringify({
-                        mode: generationMode,
-                        prompt,
-                        images: gptImages, // User's face/subject image(s) - must be array
-                        referenceImage: referenceUrl, // Reference style image (e.g., MrBeast thumbnail)
-                        size: '1536x1024', // 16:9 landscape for thumbnails
-                    }),
-                });
-
-                generateResult = await generateResponse.json();
-
-                if (!generateResult.success) {
-                    throw new Error(generateResult.error || 'Failed to generate with GPT Image 1.5');
                 }
             } else {
                 // Nano Banana Pro (Kie AI) - Text-to-Image or Edit Mode
@@ -553,15 +511,18 @@ export function Hero() {
             // Build an improved prompt from the AI suggestions
             const improvementPrompt = `Improve this YouTube thumbnail by: ${improvements.join('. ')}. Make the improvements while maintaining the core subject and composition.`;
 
-            // Use GPT Image 1.5 for regeneration (edit mode)
-            const generateResponse = await fetch('/api/generate-openai', {
+            // Use Nano Banana Pro for regeneration (edit mode)
+            const generateResponse = await fetch('/api/generate', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({
                     mode: 'edit',
                     prompt: improvementPrompt,
                     images: [generatedThumbnailUrl],
-                    size: '1536x1024',
+                    hasReferenceImage: false,
+                    aspectRatio: '16:9',
+                    resolution: '2k',
+                    outputFormat: 'png',
                 }),
             });
 
@@ -580,7 +541,7 @@ export function Hero() {
                     imageUrl: result.imageUrl,
                     prompt: `[Regenerated] ${improvementPrompt}`,
                     sourceImageUrl: generatedThumbnailUrl,
-                    model: 'GPT Image 1.5',
+                    model: 'Nano Banana Pro',
                     aspectRatio: '16:9',
                     resolution: '2k',
                 });
@@ -673,43 +634,11 @@ export function Hero() {
                 </p>
 
                 <div className="w-full">
-                    {/* Model Selector */}
-                    <div className="flex items-center justify-center mb-6">
-                        <div className="flex items-center gap-1 p-1 bg-zinc-900/80 rounded-full border border-zinc-800">
-                            <button
-                                onClick={() => setSelectedModel('nano-banana')}
-                                className={cn(
-                                    "flex items-center gap-2 px-4 py-2 rounded-full text-sm font-medium transition-all",
-                                    selectedModel === 'nano-banana'
-                                        ? "bg-gradient-to-r from-red-500 to-rose-500 text-white shadow-lg"
-                                        : "text-zinc-400 hover:text-white"
-                                )}
-                            >
-                                <Image src="/logo.jpg" alt="Nano Banana" width={16} height={16} className="h-4 w-4 rounded-sm" />
-                                <span>Nano Banana Pro</span>
-                            </button>
-                            <button
-                                onClick={() => setSelectedModel('gpt-image-1.5')}
-                                className={cn(
-                                    "flex items-center gap-2 px-4 py-2 rounded-full text-sm font-medium transition-all",
-                                    selectedModel === 'gpt-image-1.5'
-                                        ? "bg-gradient-to-r from-red-500 to-rose-500 text-white shadow-lg"
-                                        : "text-zinc-400 hover:text-white"
-                                )}
-                            >
-                                <Image src="/openai.png" alt="OpenAI" width={16} height={16} className="h-4 w-4" />
-                                <span>GPT Image 1.5</span>
-                                <span className="px-1.5 py-0.5 text-[10px] bg-emerald-500/30 text-emerald-400 rounded-full">NEW</span>
-                            </button>
-                        </div>
-                    </div>
-
                     <ChatInput
                         onGenerate={handleGenerate}
                         isGenerating={isGenerating}
                         initialImageUrl={editImageUrl}
                         initialPrompt={editPrompt}
-                        selectedModel={selectedModel}
                         onImageSelected={handleImageSelected}
                         onReferenceSelected={handleReferenceSelected}
                         onImageRemoved={handleImageRemoved}

@@ -46,7 +46,6 @@ interface ChatInputProps {
     isGenerating?: boolean;
     initialImageUrl?: string | null;
     initialPrompt?: string | null;
-    selectedModel?: 'nano-banana' | 'gpt-image-1.5';
     // Callbacks for background pre-upload (instant UX)
     onImageSelected?: (file: File, id: string) => void;
     onReferenceSelected?: (reference: ReferenceImage) => void;
@@ -102,7 +101,6 @@ export function ChatInput({
     isGenerating = false,
     initialImageUrl,
     initialPrompt,
-    selectedModel = 'gpt-image-1.5',
     onImageSelected,
     onReferenceSelected,
     onImageRemoved,
@@ -318,13 +316,13 @@ export function ChatInput({
             // Face swap mode: need at least one image and reference (prompt optional)
             setCanSubmit(hasUploadedImages && hasReferenceImage);
         } else if (!hasUploadedImages) {
-            // Text-only mode (both Nano Banana Pro and GPT Image 1.5 support text-to-image)
+            // Text-only mode (Nano Banana Pro supports text-to-image)
             setCanSubmit(hasInput);
         } else {
             // Edit mode: need images + (prompt or reference)
             setCanSubmit(hasUploadedImages && (hasInput || hasReferenceImage));
         }
-    }, [input, uploadedImages, referenceImage, faceSwapMode, selectedModel]);
+    }, [input, uploadedImages, referenceImage, faceSwapMode]);
 
     const handleGenerate = () => {
         if (canSubmit && onGenerate && !isGenerating) {
@@ -614,14 +612,14 @@ export function ChatInput({
                         {/* Model Indicator */}
                         <div className="flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-zinc-800/50 border border-zinc-700/50">
                             <Image
-                                src={selectedModel === 'gpt-image-1.5' ? "/openai.png" : "/logo.jpg"}
-                                alt={selectedModel === 'gpt-image-1.5' ? "OpenAI" : "Nano Banana"}
+                                src="/logo.jpg"
+                                alt="Nano Banana"
                                 width={14}
                                 height={14}
                                 className="h-3.5 w-3.5 rounded-sm"
                             />
                             <span className="text-xs text-zinc-400">
-                                {selectedModel === 'gpt-image-1.5' ? "GPT Image 1.5" : "Nano Banana Pro"}
+                                Nano Banana Pro
                             </span>
                         </div>
                     </div>

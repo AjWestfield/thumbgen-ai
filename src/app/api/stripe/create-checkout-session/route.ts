@@ -46,14 +46,11 @@ export async function POST(request: NextRequest) {
 
     const priceId = getPriceId(tier, billingCycle);
 
-    if (!priceId || priceId.startsWith('price_')) {
-      // Check if it's a placeholder
-      if (priceId === `price_${tier}_${billingCycle}`) {
-        return NextResponse.json(
-          { error: 'Stripe prices not configured. Please set up products in Stripe Dashboard.' },
-          { status: 500 }
-        );
-      }
+    if (!priceId) {
+      return NextResponse.json(
+        { error: 'Stripe prices not configured. Please set up products in Stripe Dashboard.' },
+        { status: 500 }
+      );
     }
 
     // Create Stripe Checkout Session

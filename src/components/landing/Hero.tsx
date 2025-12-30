@@ -8,11 +8,13 @@ import { Marquee } from "./Marquee";
 import { Sparkles } from "lucide-react";
 import { YouTubePreview } from "@/components/YouTubePreview";
 import { PreviewModal } from "@/components/PreviewModal";
+import { SubscriptionModal } from "@/components/SubscriptionModal";
 import { searchYouTube, type YouTubeVideo, type GeneratedMetadata } from "@/lib/youtube";
-import { useMutation } from "convex/react";
+import { useMutation, useQuery } from "convex/react";
 import { api } from "../../../convex/_generated/api";
 import { Id } from "../../../convex/_generated/dataModel";
 import { cn } from "@/lib/utils";
+import { useAuth } from "@clerk/nextjs";
 
 // Pre-upload state for instant UX
 interface PreUploadState {
@@ -59,8 +61,10 @@ async function uploadToConvex(
 
 export function Hero() {
     const searchParams = useSearchParams();
+    const { isSignedIn } = useAuth();
     const [showPreview, setShowPreview] = useState(false);
     const [showResultModal, setShowResultModal] = useState(false);
+    const [showSubscriptionModal, setShowSubscriptionModal] = useState(false);
     const [isGenerating, setIsGenerating] = useState(false);
     const [searchResults, setSearchResults] = useState<YouTubeVideo[]>([]);
     const [currentPrompt, setCurrentPrompt] = useState("");
@@ -69,6 +73,9 @@ export function Hero() {
     const [generatedThumbnailUrl, setGeneratedThumbnailUrl] = useState<string | null>(null);
     const [generationError, setGenerationError] = useState<string | null>(null);
     const [isRegenerating, setIsRegenerating] = useState(false);
+
+    // Credit system - only query if signed in
+    const creditInfo = useQuery(api.users.hasCredits);
 
     // Model selection state
     const [selectedModel, setSelectedModel] = useState<ModelType>('gpt-image-1.5');
@@ -227,6 +234,19 @@ export function Hero() {
 
         if (faceSwapMode && !referenceImage) {
             setGenerationError("Face swap requires a target image");
+            return;
+        }
+
+        // Check if user is signed in and has credits
+        if (!isSignedIn) {
+            // Redirect to sign-in
+            window.location.href = '/sign-in?redirect_url=' + encodeURIComponent('/');
+            return;
+        }
+
+        // Check credits - show subscription modal if insufficient
+        if (creditInfo && !creditInfo.hasCredits) {
+            setShowSubscriptionModal(true);
             return;
         }
 
@@ -497,9 +517,17 @@ export function Hero() {
             setGeneratedMetadata(searchResult.generatedMetadata);
         } catch (error) {
             console.error("Failed to generate thumbnail:", error);
-            setGenerationError(error instanceof Error ? error.message : "Failed to generate thumbnail");
-            // Close modal on error so user can see the error message
-            setShowResultModal(false);
+            const errorMessage = error instanceof Error ? error.message : "Failed to generate thumbnail";
+
+            // Check if it's an insufficient credits error (402)
+            if (errorMessage.toLowerCase().includes('insufficient credits') || errorMessage.includes('402')) {
+                setShowSubscriptionModal(true);
+                setShowResultModal(false);
+            } else {
+                setGenerationError(errorMessage);
+                // Close modal on error so user can see the error message
+                setShowResultModal(false);
+            }
         } finally {
             setIsGenerating(false);
         }
@@ -559,7 +587,14 @@ export function Hero() {
             }
         } catch (error) {
             console.error('Failed to regenerate thumbnail:', error);
-            setGenerationError(error instanceof Error ? error.message : 'Failed to regenerate thumbnail');
+            const errorMessage = error instanceof Error ? error.message : 'Failed to regenerate thumbnail';
+
+            // Check if it's an insufficient credits error
+            if (errorMessage.toLowerCase().includes('insufficient credits') || errorMessage.includes('402')) {
+                setShowSubscriptionModal(true);
+            } else {
+                setGenerationError(errorMessage);
+            }
         } finally {
             setIsRegenerating(false);
         }
@@ -567,6 +602,12 @@ export function Hero() {
 
     return (
         <section className="relative flex min-h-[90vh] flex-col justify-between overflow-hidden bg-black pt-32 md:pt-40">
+
+            {/* Subscription Modal */}
+            <SubscriptionModal
+                isOpen={showSubscriptionModal}
+                onClose={() => setShowSubscriptionModal(false)}
+            />
 
             {/* Intermediary Result Modal */}
             {showResultModal && (

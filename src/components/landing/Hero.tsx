@@ -74,8 +74,8 @@ export function Hero() {
     const [generationError, setGenerationError] = useState<string | null>(null);
     const [isRegenerating, setIsRegenerating] = useState(false);
 
-    // Credit system - only query if signed in
-    const creditInfo = useQuery(api.users.hasCredits);
+    // Credit system - only query if signed in (skip query when not authenticated)
+    const creditInfo = useQuery(api.users.hasCredits, isSignedIn ? undefined : "skip");
 
     // Model selection state
     const [selectedModel, setSelectedModel] = useState<ModelType>('gpt-image-1.5');

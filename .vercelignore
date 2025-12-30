@@ -1,0 +1,5 @@
+node_modules_backup_corrupted/
+.git/
+.next/
+*.log
+.DS_Store

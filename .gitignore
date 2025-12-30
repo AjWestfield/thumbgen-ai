@@ -50,3 +50,6 @@ public/images/thumbnail-*.png
 # typescript
 *.tsbuildinfo
 next-env.d.ts
+
+# corrupted backups
+node_modules_backup_corrupted/

@@ -1,4 +1,9 @@
 import { NextRequest, NextResponse } from 'next/server';
+import { auth } from '@clerk/nextjs/server';
+import { ConvexHttpClient } from 'convex/browser';
+import { api } from '../../../../convex/_generated/api';
+
+const convex = new ConvexHttpClient(process.env.NEXT_PUBLIC_CONVEX_URL!);
 
 const FACESWAP_MODEL = {
     id: 'wavespeed-ai/image-face-swap-pro',
@@ -20,6 +25,24 @@ interface FaceSwapResponse {
 
 export async function POST(request: NextRequest): Promise<NextResponse<FaceSwapResponse>> {
     try {
+        // Check authentication
+        const { userId } = await auth();
+        if (!userId) {
+            return NextResponse.json(
+                { success: false, error: 'Please sign in to use face swap', model: FACESWAP_MODEL.name },
+                { status: 401 }
+            );
+        }
+
+        // Check credits
+        const creditCheck = await convex.query(api.users.hasCredits);
+        if (!creditCheck.hasCredits) {
+            return NextResponse.json(
+                { success: false, error: `Insufficient credits. You need ${creditCheck.required} credits but have ${creditCheck.available}. Please upgrade your plan.`, model: FACESWAP_MODEL.name },
+                { status: 402 }
+            );
+        }
+
         const body: FaceSwapRequest = await request.json();
         const { faceImageUrl, targetImageUrl } = body;
 
@@ -113,6 +136,15 @@ export async function POST(request: NextRequest): Promise<NextResponse<FaceSwapR
 
         console.log(`Face Swap completed: ${imageUrl}`);
         console.log(`Execution time: ${data.executionTime}ms`);
+
+        // Deduct credits after successful face swap
+        try {
+            await convex.mutation(api.users.deductCredits);
+            console.log('[Face Swap] Credits deducted successfully');
+        } catch (creditError) {
+            console.error('[Face Swap] Failed to deduct credits:', creditError);
+            // Don't fail the request, just log the error
+        }
 
         return NextResponse.json({
             success: true,

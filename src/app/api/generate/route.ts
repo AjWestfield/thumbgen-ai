@@ -1,4 +1,9 @@
 import { NextRequest, NextResponse } from 'next/server';
+import { auth } from '@clerk/nextjs/server';
+import { ConvexHttpClient } from 'convex/browser';
+import { api } from '../../../../convex/_generated/api';
+
+const convex = new ConvexHttpClient(process.env.NEXT_PUBLIC_CONVEX_URL!);
 
 // Nano Banana Pro via WaveSpeed AI
 // Uses async mode with polling to avoid gateway timeouts
@@ -125,6 +130,24 @@ async function pollForResult(requestId: string, apiKey: string, maxAttempts = 30
 
 export async function POST(request: NextRequest): Promise<NextResponse<GenerateResponse>> {
     try {
+        // Check authentication
+        const { userId } = await auth();
+        if (!userId) {
+            return NextResponse.json(
+                { success: false, error: 'Please sign in to generate thumbnails', prompt: '', model: MODEL.name },
+                { status: 401 }
+            );
+        }
+
+        // Check credits
+        const creditCheck = await convex.query(api.users.hasCredits);
+        if (!creditCheck.hasCredits) {
+            return NextResponse.json(
+                { success: false, error: `Insufficient credits. You need ${creditCheck.required} credits but have ${creditCheck.available}. Please upgrade your plan.`, prompt: '', model: MODEL.name },
+                { status: 402 }
+            );
+        }
+
         const body: GenerateRequest = await request.json();
         const {
             mode = 'edit', // Default to edit for backwards compatibility
@@ -262,6 +285,15 @@ export async function POST(request: NextRequest): Promise<NextResponse<GenerateR
         }
 
         console.log(`[WaveSpeed] Generated image: ${imageUrl}`);
+
+        // Deduct credits after successful generation
+        try {
+            await convex.mutation(api.users.deductCredits);
+            console.log('[WaveSpeed] Credits deducted successfully');
+        } catch (creditError) {
+            console.error('[WaveSpeed] Failed to deduct credits:', creditError);
+            // Don't fail the request, just log the error
+        }
 
         return NextResponse.json({
             success: true,

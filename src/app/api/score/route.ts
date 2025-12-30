@@ -1,4 +1,9 @@
 import { NextRequest, NextResponse } from 'next/server';
+import { auth } from '@clerk/nextjs/server';
+import { ConvexHttpClient } from 'convex/browser';
+import { api } from '../../../../convex/_generated/api';
+
+const convex = new ConvexHttpClient(process.env.NEXT_PUBLIC_CONVEX_URL!);
 
 // Gemini 2.5 Flash for thumbnail analysis
 const GEMINI_API_KEY = process.env.GEMINI_API_KEY;
@@ -136,6 +141,32 @@ function getMimeType(url: string): string {
 
 export async function POST(request: NextRequest): Promise<NextResponse<ScoreResponse>> {
     try {
+        // Check authentication
+        const { userId } = await auth();
+        if (!userId) {
+            return NextResponse.json(
+                { success: false, error: 'Please sign in to score thumbnails' },
+                { status: 401 }
+            );
+        }
+
+        // Check credits and tier (Score is a Premium feature)
+        const creditCheck = await convex.query(api.users.hasCredits);
+        if (!creditCheck.hasCredits) {
+            return NextResponse.json(
+                { success: false, error: `Insufficient credits. You need ${creditCheck.required} credits but have ${creditCheck.available}. Please upgrade your plan.` },
+                { status: 402 }
+            );
+        }
+
+        // Check if user has Premium or Ultimate tier for Score feature
+        if (creditCheck.tier !== 'premium' && creditCheck.tier !== 'ultimate') {
+            return NextResponse.json(
+                { success: false, error: 'ThumbZap Score is a Premium feature. Please upgrade your plan to access it.' },
+                { status: 403 }
+            );
+        }
+
         const body: ScoreRequest = await request.json();
         const { imageUrl, title } = body;
 
@@ -227,6 +258,15 @@ export async function POST(request: NextRequest): Promise<NextResponse<ScoreResp
         const scoreData = JSON.parse(jsonStr.trim());
 
         console.log('[Score] Analysis complete. Overall score:', scoreData.overallScore);
+
+        // Deduct credits after successful score
+        try {
+            await convex.mutation(api.users.deductCredits);
+            console.log('[Score] Credits deducted successfully');
+        } catch (creditError) {
+            console.error('[Score] Failed to deduct credits:', creditError);
+            // Don't fail the request, just log the error
+        }
 
         return NextResponse.json({
             success: true,

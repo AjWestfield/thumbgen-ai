@@ -10,6 +10,7 @@
 
 import type * as files from "../files.js";
 import type * as thumbnails from "../thumbnails.js";
+import type * as users from "../users.js";
 
 import type {
   ApiFromModules,
@@ -20,6 +21,7 @@ import type {
 declare const fullApi: ApiFromModules<{
   files: typeof files;
   thumbnails: typeof thumbnails;
+  users: typeof users;
 }>;
 
 /**

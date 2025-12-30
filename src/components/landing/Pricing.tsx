@@ -2,8 +2,9 @@
 
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
-import { Check, X } from "lucide-react";
+import { Check, X, Loader2 } from "lucide-react";
 import { cn } from "@/lib/utils";
+import { useAuth } from "@clerk/nextjs";
 
 const plans = [
     {
@@ -85,6 +86,43 @@ const plans = [
 
 export function Pricing() {
     const [isAnnual, setIsAnnual] = useState(false);
+    const [loadingTier, setLoadingTier] = useState<string | null>(null);
+    const { isSignedIn } = useAuth();
+
+    const handleSubscribe = async (planName: string) => {
+        if (!isSignedIn) {
+            // Redirect to sign-in with return URL
+            window.location.href = '/sign-in?redirect_url=' + encodeURIComponent('/#pricing');
+            return;
+        }
+
+        setLoadingTier(planName);
+
+        try {
+            const response = await fetch('/api/stripe/create-checkout-session', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    tier: planName.toLowerCase(), // 'essential', 'premium', 'ultimate'
+                    billingCycle: isAnnual ? 'annual' : 'monthly',
+                }),
+            });
+
+            const data = await response.json();
+
+            if (data.sessionUrl) {
+                window.location.href = data.sessionUrl;
+            } else {
+                console.error('Checkout error:', data.error);
+                alert(data.error || 'Failed to create checkout session. Please try again.');
+            }
+        } catch (error) {
+            console.error('Checkout error:', error);
+            alert('An error occurred. Please try again.');
+        } finally {
+            setLoadingTier(null);
+        }
+    };
 
     return (
         <section id="pricing" className="bg-black py-12 text-white">
@@ -196,6 +234,8 @@ export function Pricing() {
 
                                 {/* Subscribe Button */}
                                 <Button
+                                    onClick={() => handleSubscribe(plan.name)}
+                                    disabled={loadingTier === plan.name}
                                     className={cn(
                                         "w-full rounded-full h-10 text-sm font-bold transition-all duration-200",
                                         plan.popular
@@ -203,7 +243,11 @@ export function Pricing() {
                                             : "bg-[#1f1f1f] hover:bg-[#2a2a2a] text-white border border-transparent hover:border-zinc-700"
                                     )}
                                 >
-                                    Subscribe
+                                    {loadingTier === plan.name ? (
+                                        <Loader2 className="h-4 w-4 animate-spin" />
+                                    ) : (
+                                        'Subscribe'
+                                    )}
                                 </Button>
                             </div>
                         );

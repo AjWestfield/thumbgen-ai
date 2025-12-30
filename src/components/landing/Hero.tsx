@@ -244,8 +244,10 @@ export function Hero() {
             return;
         }
 
-        // Check credits - show subscription modal if insufficient
-        if (creditInfo && !creditInfo.hasCredits) {
+        // Check credits - show subscription modal if insufficient or can't verify
+        // creditInfo is undefined when: loading, "skip" used, or auth failed
+        // We only proceed if creditInfo exists AND hasCredits is true
+        if (!creditInfo || !creditInfo.hasCredits) {
             setShowSubscriptionModal(true);
             return;
         }

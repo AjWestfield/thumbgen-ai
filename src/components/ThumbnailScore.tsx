@@ -343,20 +343,12 @@ export function ThumbnailScore({ imageUrl, title, onClose, onRegenerate, isRegen
               </AnimatePresence>
             </div>
 
-            {/* Re-analyze Button */}
-            <button
-              onClick={analyzeThumbail}
-              className="w-full py-2 text-sm text-white/60 hover:text-white hover:bg-white/5 rounded-lg transition-colors"
-            >
-              Re-analyze
-            </button>
-
-            {/* Regenerate with Improvements Button */}
-            {scoreData?.improvements && scoreData.improvements.length > 0 && onRegenerate && (
+            {/* Regenerate Button - Uses all improvements from "How to improve" section */}
+            {onRegenerate ? (
               <button
-                onClick={() => onRegenerate(scoreData.improvements)}
+                onClick={() => onRegenerate(scoreData?.improvements || [])}
                 disabled={isRegenerating}
-                className="w-full mt-2 py-2.5 px-4 bg-gradient-to-r from-red-600 to-red-500 hover:from-red-500 hover:to-red-400 disabled:opacity-50 disabled:cursor-not-allowed text-white text-sm font-medium rounded-lg transition-all flex items-center justify-center gap-2"
+                className="w-full py-2.5 px-4 bg-gradient-to-r from-red-600 to-red-500 hover:from-red-500 hover:to-red-400 disabled:opacity-50 disabled:cursor-not-allowed text-white text-sm font-medium rounded-lg transition-all flex items-center justify-center gap-2"
               >
                 {isRegenerating ? (
                   <>
@@ -366,9 +358,16 @@ export function ThumbnailScore({ imageUrl, title, onClose, onRegenerate, isRegen
                 ) : (
                   <>
                     <Sparkles className="w-4 h-4" />
-                    Regenerate with Improvements
+                    Regenerate
                   </>
                 )}
+              </button>
+            ) : (
+              <button
+                onClick={analyzeThumbail}
+                className="w-full py-2 text-sm text-white/60 hover:text-white hover:bg-white/5 rounded-lg transition-colors"
+              >
+                Re-analyze
               </button>
             )}
           </motion.div>

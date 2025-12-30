@@ -212,7 +212,10 @@ export function Hero() {
         </div>
     );
 
-    const handleGenerate = async (prompt: string, imageFile?: File, referenceImage?: ReferenceImage, faceSwapMode?: boolean) => {
+    const handleGenerate = async (prompt: string, imageFiles?: File[], referenceImage?: ReferenceImage, faceSwapMode?: boolean) => {
+        // Get the first file from the array (main image)
+        const imageFile = imageFiles?.[0];
+
         // Auto-detect generation mode based on whether an image is uploaded
         const generationMode: GenerationMode = imageFile ? 'edit' : 'generate';
 

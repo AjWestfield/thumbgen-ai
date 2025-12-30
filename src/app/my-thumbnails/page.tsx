@@ -160,6 +160,7 @@ export default function MyThumbnailsPage() {
   // Use auth-aware query - automatically filters by user via JWT
   const thumbnails = useQuery(api.thumbnails.getUserThumbnails);
   const deleteThumbnail = useMutation(api.thumbnails.deleteThumbnail);
+  const saveThumbnail = useMutation(api.thumbnails.saveThumbnail);
 
   // Preview state
   const [showPreviewModal, setShowPreviewModal] = useState(false);
@@ -169,6 +170,7 @@ export default function MyThumbnailsPage() {
   const [searchResults, setSearchResults] = useState<YouTubeVideo[]>([]);
   const [generatedMetadata, setGeneratedMetadata] = useState<GeneratedMetadata | undefined>(undefined);
   const [isLoadingPreview, setIsLoadingPreview] = useState(false);
+  const [isRegenerating, setIsRegenerating] = useState(false);
 
   // Delete handler - ownership verified server-side
   const handleDelete = async (id: Id<"thumbnails">) => {
@@ -227,6 +229,50 @@ export default function MyThumbnailsPage() {
     router.push(`/?${params.toString()}`);
   };
 
+  // Regenerate thumbnail with AI improvements
+  const handleRegenerateWithImprovements = async (improvements: string[]) => {
+    if (!selectedThumbnail || isRegenerating) return;
+    setIsRegenerating(true);
+
+    try {
+      const improvementPrompt = `Improve this YouTube thumbnail by: ${improvements.join('. ')}. Make the improvements while maintaining the core subject and composition.`;
+
+      const response = await fetch('/api/generate-openai', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          mode: 'edit',
+          prompt: improvementPrompt,
+          images: [selectedThumbnail.imageUrl],
+          size: '1536x1024',
+        }),
+      });
+
+      const data = await response.json();
+      if (data.imageUrl) {
+        // Save the regenerated thumbnail
+        await saveThumbnail({
+          imageUrl: data.imageUrl,
+          prompt: `[Improved] ${selectedThumbnail.prompt}`,
+          model: 'gpt-image-1.5',
+          aspectRatio: '16:9',
+          resolution: '1536x1024',
+        });
+
+        // Update the selected thumbnail to show the new image
+        setSelectedThumbnail({
+          ...selectedThumbnail,
+          imageUrl: data.imageUrl,
+          prompt: `[Improved] ${selectedThumbnail.prompt}`,
+        });
+      }
+    } catch (error) {
+      console.error('Regeneration failed:', error);
+    } finally {
+      setIsRegenerating(false);
+    }
+  };
+
   // Show loading state while checking authentication
   if (!isUserLoaded) {
     return (
@@ -247,6 +293,8 @@ export default function MyThumbnailsPage() {
           generatedMetadata={generatedMetadata}
           isLoading={isLoadingPreview}
           isViewOnly={true}
+          onRegenerateWithImprovements={handleRegenerateWithImprovements}
+          isRegenerating={isRegenerating}
         />
       )}
 

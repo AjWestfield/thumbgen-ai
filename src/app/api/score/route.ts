@@ -25,86 +25,100 @@ interface ScoreResponse {
     error?: string;
 }
 
-const SCORING_PROMPT = `You are an expert YouTube thumbnail analyst. Analyze this thumbnail image and provide a detailed score based on the following 5 pillars that determine click-through rate (CTR) performance.
+const SCORING_PROMPT = `You are a brutally honest YouTube thumbnail analyst with expertise in viral content. Analyze this thumbnail and score it based on 5 pillars that determine click-through rate (CTR).
 
-Score each pillar from 0-100 and provide a brief explanation for each score.
+CRITICAL SCORING RULES:
+- Use the FULL 0-100 scale. Don't cluster scores around 70-80.
+- Be harsh and specific. Most thumbnails should score 40-65 (mediocre to decent).
+- Only truly exceptional thumbnails get 80+. Viral-worthy thumbnails are rare (90+).
+- Each pillar should have DIFFERENT scores based on actual strengths/weaknesses.
+- The overall score should be a weighted average, NOT just an arbitrary number.
+
+SCORE DISTRIBUTION GUIDE:
+- 0-25: Poor/Amateur (major issues, would not click)
+- 26-45: Below Average (several problems, needs work)
+- 46-60: Average (decent but forgettable, blends in)
+- 61-75: Good (solid thumbnail, some appeal)
+- 76-85: Very Good (stands out, likely to get clicks)
+- 86-95: Excellent (viral potential, highly compelling)
+- 96-100: Perfect (extremely rare, MrBeast-level execution)
 
 THE 5 PILLARS:
 
-1. **VIRALITY** (Stopping Power)
-   - Does it grab attention instantly?
-   - Is there visual intensity/drama?
-   - Does it stand out from other thumbnails?
-   - Is there emotional impact?
+1. **VIRALITY** (Stopping Power) - Weight: 25%
+   - Does it INSTANTLY grab attention in a crowded feed?
+   - Is there visual drama, tension, or shock value?
+   - Would it make someone stop mid-scroll?
+   - Compare to top YouTubers: MrBeast, MKBHD, PewDiePie
 
-2. **CLARITY** (Message Clarity)
-   - Is the main subject/topic immediately clear?
-   - Is the visual hierarchy effective?
-   - Can you understand what the video is about in 1-2 seconds?
-   - Is the text (if any) readable and well-placed?
+2. **CLARITY** (Message Clarity) - Weight: 20%
+   - Is the subject crystal clear within 0.5 seconds?
+   - Is text readable at small sizes (mobile feed)?
+   - Is there visual clutter or confusion?
+   - Does it clearly communicate what the video is about?
 
-3. **CURIOSITY** (Click Trigger)
-   - Does it create an information gap?
-   - Does it make viewers want to know more?
-   - Is there intrigue or mystery?
-   - Does it trigger FOMO or urgency?
+3. **CURIOSITY** (Click Trigger) - Weight: 25%
+   - Does it create an irresistible information gap?
+   - Is there a "I NEED to know what happens" feeling?
+   - Does it avoid clickbait while still intriguing?
+   - Would YOU click on this thumbnail?
 
-4. **EMOTION** (Emotional Appeal)
-   - Does it evoke strong emotions?
-   - Are facial expressions compelling (if present)?
-   - Does it connect with the viewer emotionally?
-   - Is there relatability or aspirational content?
+4. **EMOTION** (Emotional Appeal) - Weight: 15%
+   - Are facial expressions genuine and compelling?
+   - Does it trigger an emotional response (excitement, fear, joy)?
+   - Is there human connection or relatability?
+   - Does it make you FEEL something?
 
-5. **COMPOSITION** (Technical Quality)
-   - Is the layout balanced and professional?
-   - Are colors vibrant and contrasting?
-   - Is the image quality high?
-   - Does it follow the rule of thirds or other design principles?
+5. **COMPOSITION** (Technical Quality) - Weight: 15%
+   - Is the color contrast optimized for YouTube's dark/light modes?
+   - Is the rule of thirds applied effectively?
+   - Are there any AI artifacts, blur, or quality issues?
+   - Is the visual hierarchy professional?
 
 Respond in this exact JSON format:
 {
-    "overallScore": <number 0-100>,
+    "overallScore": <weighted average of pillars, rounded to nearest integer>,
     "pillars": [
         {
             "name": "Virality",
-            "score": <number 0-100>,
-            "description": "<brief 1-2 sentence explanation>",
+            "score": <0-100, be critical>,
+            "description": "<specific reason for this score, reference what works or doesn't>",
             "icon": "flame"
         },
         {
             "name": "Clarity",
-            "score": <number 0-100>,
-            "description": "<brief 1-2 sentence explanation>",
+            "score": <0-100, be critical>,
+            "description": "<specific reason for this score>",
             "icon": "eye"
         },
         {
             "name": "Curiosity",
-            "score": <number 0-100>,
-            "description": "<brief 1-2 sentence explanation>",
+            "score": <0-100, be critical>,
+            "description": "<specific reason for this score>",
             "icon": "sparkles"
         },
         {
             "name": "Emotion",
-            "score": <number 0-100>,
-            "description": "<brief 1-2 sentence explanation>",
+            "score": <0-100, be critical>,
+            "description": "<specific reason for this score>",
             "icon": "heart"
         },
         {
             "name": "Composition",
-            "score": <number 0-100>,
-            "description": "<brief 1-2 sentence explanation>",
+            "score": <0-100, be critical>,
+            "description": "<specific reason for this score>",
             "icon": "layout"
         }
     ],
-    "summary": "<2-3 sentence overall assessment>",
+    "summary": "<honest 2-3 sentence assessment - be direct about what's working and what isn't>",
     "improvements": [
-        "<specific improvement suggestion 1>",
-        "<specific improvement suggestion 2>",
-        "<specific improvement suggestion 3>"
+        "<actionable improvement with specific detail>",
+        "<actionable improvement with specific detail>",
+        "<actionable improvement with specific detail>"
     ]
 }
 
-Be honest and critical. A score of 50 is average, 70+ is good, 85+ is excellent, 95+ is viral-worthy.`;
+Remember: Your job is to help creators improve. A honest 55 is more valuable than a flattering 78.`;
 
 async function fetchImageAsBase64(imageUrl: string): Promise<string> {
     const response = await fetch(imageUrl);
@@ -172,7 +186,7 @@ export async function POST(request: NextRequest): Promise<NextResponse<ScoreResp
                     },
                 ],
                 generationConfig: {
-                    temperature: 0.3,
+                    temperature: 0.7,  // Higher for more varied, nuanced scoring
                     topK: 40,
                     topP: 0.95,
                     maxOutputTokens: 2048,

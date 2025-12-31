@@ -320,131 +320,56 @@
 
 /* ===========================================
    CLERK COMPONENT STYLING OVERRIDES
-   Transparent dark theme buttons (no red)
+   Only target elements INSIDE Clerk modals/popovers
    =========================================== */
 
-/* CRITICAL: Override Tailwind arbitrary value classes that Clerk adds */
-.bg-\[\#FF0000\],
-button.bg-\[\#FF0000\],
-[class*="cl-"].bg-\[\#FF0000\],
-.cl-profileSectionPrimaryButton.bg-\[\#FF0000\] {
-  background-color: transparent !important;
-  background: transparent !important;
-  border: 1px solid #3f3f46 !important;
-}
-
-.hover\:bg-\[\#FF0000\]\/90:hover,
-button.hover\:bg-\[\#FF0000\]\/90:hover,
-[class*="cl-"].hover\:bg-\[\#FF0000\]\/90:hover {
-  background-color: rgba(63, 63, 70, 0.3) !important;
-  background: rgba(63, 63, 70, 0.3) !important;
-}
-
-/* Target ALL Clerk primary/action buttons - transparent dark theme */
-.cl-formButtonPrimary,
-.cl-button,
-.cl-avatarImageActionsUpload,
-.cl-profileSectionPrimaryButton,
-.cl-userButtonPopoverActionButton,
-.cl-actionCard,
-button[class*="cl-"][class*="primary"],
-button[class*="cl-"][class*="Primary"],
-button[class*="cl-formButton"],
-[class*="cl-"][class*="button"]:not([class*="secondary"]):not([class*="ghost"]) {
+/* Target buttons ONLY inside Clerk modal/card containers */
+.cl-modalContent .cl-formButtonPrimary,
+.cl-modalContent .cl-button,
+.cl-modalContent .cl-avatarImageActionsUpload,
+.cl-modalContent .cl-profileSectionPrimaryButton,
+.cl-card .cl-formButtonPrimary,
+.cl-card .cl-button,
+.cl-card .cl-profileSectionPrimaryButton,
+.cl-userProfile .cl-formButtonPrimary,
+.cl-userProfile .cl-button,
+.cl-userProfile .cl-profileSectionPrimaryButton {
   background-color: transparent !important;
   background: transparent !important;
   border: 1px solid #3f3f46 !important;
   color: #a1a1aa !important;
 }
 
-/* Hover states for Clerk buttons */
-.cl-formButtonPrimary:hover,
-.cl-button:hover,
-.cl-avatarImageActionsUpload:hover,
-.cl-profileSectionPrimaryButton:hover,
-button[class*="cl-"][class*="primary"]:hover,
-button[class*="cl-"][class*="Primary"]:hover,
-button[class*="cl-formButton"]:hover {
+/* Hover states - only inside Clerk containers */
+.cl-modalContent .cl-formButtonPrimary:hover,
+.cl-modalContent .cl-button:hover,
+.cl-modalContent .cl-profileSectionPrimaryButton:hover,
+.cl-card .cl-formButtonPrimary:hover,
+.cl-card .cl-button:hover,
+.cl-card .cl-profileSectionPrimaryButton:hover,
+.cl-userProfile .cl-formButtonPrimary:hover,
+.cl-userProfile .cl-button:hover,
+.cl-userProfile .cl-profileSectionPrimaryButton:hover {
   background-color: rgba(63, 63, 70, 0.3) !important;
   background: rgba(63, 63, 70, 0.3) !important;
   border-color: #52525b !important;
   color: white !important;
 }
 
-/* Focus states */
-.cl-formButtonPrimary:focus,
-.cl-button:focus,
-button[class*="cl-"][class*="primary"]:focus {
-  background-color: transparent !important;
-  box-shadow: 0 0 0 2px rgba(63, 63, 70, 0.5) !important;
-}
-
-/* Override any inline styles Clerk might add */
-[class*="cl-"] button[style*="background"],
-[class*="cl-"][style*="background"] {
-  background-color: transparent !important;
-  background: transparent !important;
-}
-
-/* Specific override for profile section action buttons */
-[class*="cl-profileSection"] button,
-[class*="cl-profile"] button[class*="cl-"] {
-  background-color: transparent !important;
-  background: transparent !important;
-  border: 1px solid #3f3f46 !important;
-  color: #a1a1aa !important;
-}
-
-[class*="cl-profileSection"] button:hover,
-[class*="cl-profile"] button[class*="cl-"]:hover {
-  background-color: rgba(63, 63, 70, 0.3) !important;
-  background: rgba(63, 63, 70, 0.3) !important;
-  color: white !important;
-}
-
-/* Override CSS custom properties Clerk uses for primary color */
-[class*="cl-"] {
-  --cl-color-primary: #3f3f46 !important;
-  --cl-primary: #3f3f46 !important;
-  --color-primary: #3f3f46 !important;
-}
-
-/* Hide "Secured by Clerk" branding - aggressive selectors */
-.cl-internal-b3fm6y,
-[class*="cl-"] a[href*="clerk.com"],
-[class*="cl-"] a[href*="go.clerk.com"],
+/* Hide "Secured by Clerk" branding - only inside Clerk containers */
+.cl-modalContent .cl-internal-b3fm6y,
+.cl-modalContent [class*="cl-footer"],
+.cl-modalContent a[href*="clerk.com"],
+.cl-modalContent a[href*="go.clerk.com"],
+.cl-card .cl-internal-b3fm6y,
+.cl-card [class*="cl-footer"],
+.cl-userProfile .cl-internal-b3fm6y,
+.cl-userProfile [class*="cl-footer"],
 .cl-footer,
-.cl-footerAction,
-[class*="cl-footer"],
-[class*="cl-powered"],
-[class*="cl-internal"] a[href*="clerk"],
-[class*="cl-userProfile"] [class*="footer"],
-[class*="cl-modalContent"] [class*="footer"],
-[class*="cl-card"] [class*="footer"],
-div[class*="cl-"][class*="internal"],
-span[class*="cl-"][class*="internal"],
-a[class*="cl-"][class*="internal"],
-[class*="cl-"] span:has(a[href*="clerk"]),
-[class*="cl-"] div:has(a[href*="clerk"]) {
+.cl-footerAction {
   display: none !important;
   visibility: hidden !important;
   opacity: 0 !important;
   height: 0 !important;
-  max-height: 0 !important;
   overflow: hidden !important;
-  margin: 0 !important;
-  padding: 0 !important;
-  font-size: 0 !important;
-  line-height: 0 !important;
-}
-
-/* Hide any text containing "Secured by" */
-[class*="cl-"] *:not(button):not(input):not(textarea) {
-  font-size: inherit;
-}
-
-/* Target the specific footer area in Clerk modals */
-[class*="cl-modalContent"] > div:last-child:has(a[href*="clerk"]),
-[class*="cl-card"] > div:last-child:has(a[href*="clerk"]) {
-  display: none !important;
 }

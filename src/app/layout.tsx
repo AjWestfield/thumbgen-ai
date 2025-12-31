@@ -66,7 +66,6 @@ export default function RootLayout({
               socialButtonsBlockButtonText: "text-white",
               dividerLine: "bg-zinc-700",
               dividerText: "text-zinc-400",
-              footerActionLink: "text-zinc-400 hover:text-zinc-300",
               avatarBox: "border-zinc-700",
               userButtonPopoverCard: "bg-zinc-950 border-zinc-800",
               userButtonPopoverActionButton: "text-zinc-300 hover:bg-zinc-800",

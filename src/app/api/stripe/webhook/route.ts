@@ -79,26 +79,38 @@ async function handleCheckoutCompleted(session: Stripe.Checkout.Session) {
   const tier = session.metadata?.tier as TierName;
   const billingCycle = session.metadata?.billingCycle as 'monthly' | 'annual';
 
+  console.log('[Webhook] checkout.session.completed received:', {
+    sessionId: session.id,
+    clerkUserId,
+    tier,
+    billingCycle,
+    customerId: session.customer,
+    subscriptionId: session.subscription,
+  });
+
   if (!clerkUserId || !tier || !billingCycle) {
     console.error('[Webhook] Missing metadata in checkout session:', session.metadata);
-    return;
+    throw new Error(`Missing required metadata: clerkUserId=${clerkUserId}, tier=${tier}, billingCycle=${billingCycle}`);
   }
 
   // Retrieve subscription details
+  console.log('[Webhook] Retrieving subscription:', session.subscription);
   const subscription = await stripe.subscriptions.retrieve(session.subscription as string) as Stripe.Subscription;
+  console.log('[Webhook] Subscription retrieved:', subscription.id, subscription.status);
 
   // Get customer email
+  console.log('[Webhook] Retrieving customer:', session.customer);
   const customer = await stripe.customers.retrieve(session.customer as string) as Stripe.Customer;
   const email = customer.email || session.customer_email || '';
+  console.log('[Webhook] Customer email:', email);
 
   const credits = TIERS[tier].credits;
-
-  console.log(`[Webhook] Creating/updating user ${clerkUserId} with ${tier} plan (${credits} credits)`);
+  console.log(`[Webhook] Tier ${tier} = ${credits} credits`);
 
   // Get current period end from subscription items
   const currentPeriodEnd = subscription.items.data[0]?.current_period_end || Math.floor(Date.now() / 1000);
 
-  await convex.mutation(api.users.createUserFromWebhook, {
+  const userData = {
     clerkUserId,
     email,
     stripeCustomerId: session.customer as string,
@@ -110,9 +122,19 @@ async function handleCheckoutCompleted(session: Stripe.Checkout.Session) {
     cancelAtPeriodEnd: subscription.cancel_at_period_end,
     credits,
     creditsPerMonth: credits,
-  });
+  };
 
-  console.log(`[Webhook] Subscription activated for user ${clerkUserId}: ${tier} (${billingCycle})`);
+  console.log('[Webhook] Calling Convex createUserFromWebhook with:', userData);
+
+  try {
+    const result = await convex.mutation(api.users.createUserFromWebhook, userData);
+    console.log('[Webhook] Convex mutation result:', result);
+    console.log(`[Webhook] SUCCESS: User ${clerkUserId} activated with ${tier} plan (${credits} credits)`);
+  } catch (convexError) {
+    console.error('[Webhook] CRITICAL: Convex mutation failed:', convexError);
+    console.error('[Webhook] User data that failed:', userData);
+    throw convexError; // Re-throw to mark webhook as failed
+  }
 }
 
 async function handleSubscriptionUpdated(subscription: Stripe.Subscription) {

@@ -163,11 +163,12 @@ function MyThumbnailsContent() {
   const deleteThumbnail = useMutation(api.thumbnails.deleteThumbnail);
   const saveThumbnail = useMutation(api.thumbnails.saveThumbnail);
 
-  // Subscription success state
+  // Subscription success/error state
   const [subscriptionSuccess, setSubscriptionSuccess] = useState<{
     tier: string;
     credits: number;
   } | null>(null);
+  const [subscriptionError, setSubscriptionError] = useState<string | null>(null);
   const [isVerifyingSession, setIsVerifyingSession] = useState(false);
 
   // Verify checkout session on page load (grants credits after Stripe checkout)
@@ -177,14 +178,19 @@ function MyThumbnailsContent() {
 
     if (success === 'true' && sessionId && !isVerifyingSession) {
       setIsVerifyingSession(true);
+      setSubscriptionError(null);
+
+      console.log('[My Thumbnails] Verifying checkout session:', sessionId);
 
       fetch('/api/stripe/verify-session', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ sessionId }),
       })
-        .then((res) => res.json())
-        .then((data) => {
+        .then(async (res) => {
+          const data = await res.json();
+          console.log('[My Thumbnails] Verify session response:', data);
+
           if (data.success) {
             setSubscriptionSuccess({
               tier: data.tier,
@@ -192,10 +198,15 @@ function MyThumbnailsContent() {
             });
             // Clear URL params after successful verification
             router.replace('/my-thumbnails');
+          } else {
+            // Show error to user
+            console.error('[My Thumbnails] Verify session failed:', data.error);
+            setSubscriptionError(data.error || 'Failed to activate subscription. Please contact support.');
           }
         })
         .catch((err) => {
-          console.error('Failed to verify session:', err);
+          console.error('[My Thumbnails] Failed to verify session:', err);
+          setSubscriptionError('Failed to verify subscription. Please refresh the page or contact support.');
         })
         .finally(() => {
           setIsVerifyingSession(false);
@@ -347,6 +358,38 @@ function MyThumbnailsContent() {
             >
               &times;
             </button>
+          </div>
+        </div>
+      )}
+
+      {/* Subscription Error Banner */}
+      {subscriptionError && (
+        <div className="fixed top-20 left-1/2 -translate-x-1/2 z-50 animate-in fade-in slide-in-from-top-4 duration-300">
+          <div className="flex items-center gap-3 px-6 py-4 rounded-xl bg-red-500/10 border border-red-500/20 shadow-lg shadow-red-500/5 max-w-md">
+            <div className="text-red-500 text-xl">!</div>
+            <div>
+              <p className="text-sm font-medium text-white">Subscription Activation Failed</p>
+              <p className="text-xs text-zinc-400">{subscriptionError}</p>
+            </div>
+            <button
+              onClick={() => setSubscriptionError(null)}
+              className="ml-4 text-zinc-400 hover:text-white"
+            >
+              &times;
+            </button>
+          </div>
+        </div>
+      )}
+
+      {/* Verifying Session Loading */}
+      {isVerifyingSession && (
+        <div className="fixed top-20 left-1/2 -translate-x-1/2 z-50 animate-in fade-in slide-in-from-top-4 duration-300">
+          <div className="flex items-center gap-3 px-6 py-4 rounded-xl bg-blue-500/10 border border-blue-500/20 shadow-lg">
+            <Loader2 className="h-5 w-5 text-blue-500 animate-spin" />
+            <div>
+              <p className="text-sm font-medium text-white">Activating your subscription...</p>
+              <p className="text-xs text-zinc-400">Please wait while we verify your payment</p>
+            </div>
           </div>
         </div>
       )}

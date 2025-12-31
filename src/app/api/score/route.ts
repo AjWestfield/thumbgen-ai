@@ -150,8 +150,8 @@ export async function POST(request: NextRequest): Promise<NextResponse<ScoreResp
             );
         }
 
-        // Check credits and tier (Score is a Premium feature)
-        const creditCheck = await convex.query(api.users.hasCredits);
+        // Check credits and tier (Score is a Premium feature) - using clerkUserId since ConvexHttpClient doesn't have auth context
+        const creditCheck = await convex.query(api.users.hasCreditsForUser, { clerkUserId: userId });
         if (!creditCheck.hasCredits) {
             return NextResponse.json(
                 { success: false, error: `Insufficient credits. You need ${creditCheck.required} credits but have ${creditCheck.available}. Please upgrade your plan.` },
@@ -259,9 +259,9 @@ export async function POST(request: NextRequest): Promise<NextResponse<ScoreResp
 
         console.log('[Score] Analysis complete. Overall score:', scoreData.overallScore);
 
-        // Deduct credits after successful score
+        // Deduct credits after successful score (using clerkUserId since ConvexHttpClient doesn't have auth context)
         try {
-            await convex.mutation(api.users.deductCredits);
+            await convex.mutation(api.users.deductCreditsForUser, { clerkUserId: userId });
             console.log('[Score] Credits deducted successfully');
         } catch (creditError) {
             console.error('[Score] Failed to deduct credits:', creditError);

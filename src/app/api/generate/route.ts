@@ -139,8 +139,8 @@ export async function POST(request: NextRequest): Promise<NextResponse<GenerateR
             );
         }
 
-        // Check credits
-        const creditCheck = await convex.query(api.users.hasCredits);
+        // Check credits (using clerkUserId since ConvexHttpClient doesn't have auth context)
+        const creditCheck = await convex.query(api.users.hasCreditsForUser, { clerkUserId: userId });
         if (!creditCheck.hasCredits) {
             return NextResponse.json(
                 { success: false, error: `Insufficient credits. You need ${creditCheck.required} credits but have ${creditCheck.available}. Please upgrade your plan.`, prompt: '', model: MODEL.name },
@@ -286,9 +286,9 @@ export async function POST(request: NextRequest): Promise<NextResponse<GenerateR
 
         console.log(`[WaveSpeed] Generated image: ${imageUrl}`);
 
-        // Deduct credits after successful generation
+        // Deduct credits after successful generation (using clerkUserId since ConvexHttpClient doesn't have auth context)
         try {
-            await convex.mutation(api.users.deductCredits);
+            await convex.mutation(api.users.deductCreditsForUser, { clerkUserId: userId });
             console.log('[WaveSpeed] Credits deducted successfully');
         } catch (creditError) {
             console.error('[WaveSpeed] Failed to deduct credits:', creditError);

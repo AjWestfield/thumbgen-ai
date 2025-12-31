@@ -3,7 +3,8 @@
 import Link from "next/link";
 import { FloatingNav } from "@/components/ui/floating-navbar";
 import { Sparkles, DollarSign, Image } from "lucide-react";
-import { SignInButton, SignedIn, SignedOut, UserButton } from "@clerk/nextjs";
+import { SignInButton, SignedIn, SignedOut } from "@clerk/nextjs";
+import { UserMenuButton } from "@/components/UserMenuButton";
 
 // ThumbZap logo - Red with lightning bolt zap icon
 function ThumbZapLogo() {
@@ -62,25 +63,9 @@ export function Navbar() {
             </SignInButton>
           </SignedOut>
 
-          {/* Show UserButton when authenticated */}
+          {/* Show UserMenuButton when authenticated */}
           <SignedIn>
-            <UserButton
-              appearance={{
-                elements: {
-                  avatarBox: "w-8 h-8",
-                  userButtonPopoverCard: {
-                    backgroundColor: "#0f0f0f",
-                    border: "1px solid rgba(255, 255, 255, 0.1)",
-                  },
-                  userButtonPopoverActionButton: {
-                    "&:hover": {
-                      backgroundColor: "#1a1a1a",
-                    },
-                  },
-                },
-              }}
-              afterSignOutUrl="/"
-            />
+            <UserMenuButton />
           </SignedIn>
         </>
       }

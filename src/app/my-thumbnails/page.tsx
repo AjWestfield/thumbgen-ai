@@ -1,12 +1,12 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useQuery, useMutation } from "convex/react";
 import { useUser } from "@clerk/nextjs";
 import { api } from "../../../convex/_generated/api";
 import Image from "next/image";
-import { Trash2, Download, Calendar, Sparkles, Eye, Pencil } from "lucide-react";
-import { useRouter } from "next/navigation";
+import { Trash2, Download, Calendar, Sparkles, Eye, Pencil, CheckCircle } from "lucide-react";
+import { useRouter, useSearchParams } from "next/navigation";
 import { Button } from "@/components/ui/button";
 import { Id } from "../../../convex/_generated/dataModel";
 import dynamic from "next/dynamic";
@@ -155,12 +155,53 @@ function ThumbnailCard({
 
 export default function MyThumbnailsPage() {
   const router = useRouter();
+  const searchParams = useSearchParams();
   const { user, isLoaded: isUserLoaded } = useUser();
 
   // Use auth-aware query - automatically filters by user via JWT
   const thumbnails = useQuery(api.thumbnails.getUserThumbnails);
   const deleteThumbnail = useMutation(api.thumbnails.deleteThumbnail);
   const saveThumbnail = useMutation(api.thumbnails.saveThumbnail);
+
+  // Subscription success state
+  const [subscriptionSuccess, setSubscriptionSuccess] = useState<{
+    tier: string;
+    credits: number;
+  } | null>(null);
+  const [isVerifyingSession, setIsVerifyingSession] = useState(false);
+
+  // Verify checkout session on page load (grants credits after Stripe checkout)
+  useEffect(() => {
+    const success = searchParams.get('success');
+    const sessionId = searchParams.get('session_id');
+
+    if (success === 'true' && sessionId && !isVerifyingSession) {
+      setIsVerifyingSession(true);
+
+      fetch('/api/stripe/verify-session', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ sessionId }),
+      })
+        .then((res) => res.json())
+        .then((data) => {
+          if (data.success) {
+            setSubscriptionSuccess({
+              tier: data.tier,
+              credits: data.credits,
+            });
+            // Clear URL params after successful verification
+            router.replace('/my-thumbnails');
+          }
+        })
+        .catch((err) => {
+          console.error('Failed to verify session:', err);
+        })
+        .finally(() => {
+          setIsVerifyingSession(false);
+        });
+    }
+  }, [searchParams, router, isVerifyingSession]);
 
   // Preview state
   const [showPreviewModal, setShowPreviewModal] = useState(false);
@@ -287,6 +328,29 @@ export default function MyThumbnailsPage() {
 
   return (
     <div className="min-h-screen bg-black">
+      {/* Subscription Success Banner */}
+      {subscriptionSuccess && (
+        <div className="fixed top-20 left-1/2 -translate-x-1/2 z-50 animate-in fade-in slide-in-from-top-4 duration-300">
+          <div className="flex items-center gap-3 px-6 py-4 rounded-xl bg-green-500/10 border border-green-500/20 shadow-lg shadow-green-500/5">
+            <CheckCircle className="h-5 w-5 text-green-500" />
+            <div>
+              <p className="text-sm font-medium text-white">
+                {subscriptionSuccess.tier.charAt(0).toUpperCase() + subscriptionSuccess.tier.slice(1)} Plan Activated!
+              </p>
+              <p className="text-xs text-zinc-400">
+                {subscriptionSuccess.credits.toLocaleString()} credits added to your account
+              </p>
+            </div>
+            <button
+              onClick={() => setSubscriptionSuccess(null)}
+              className="ml-4 text-zinc-400 hover:text-white"
+            >
+              &times;
+            </button>
+          </div>
+        </div>
+      )}
+
       {/* Preview Modal */}
       {showPreviewModal && selectedThumbnail && (
         <PreviewModal

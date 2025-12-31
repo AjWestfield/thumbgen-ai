@@ -61,6 +61,23 @@ export const getAllThumbnails = query({
   },
 });
 
+// Get current user's thumbnail count
+export const getThumbnailCount = query({
+  handler: async (ctx) => {
+    const identity = await ctx.auth.getUserIdentity();
+    if (!identity) {
+      return 0;
+    }
+
+    const thumbnails = await ctx.db
+      .query("thumbnails")
+      .withIndex("by_user_created", (q) => q.eq("userId", identity.subject))
+      .collect();
+
+    return thumbnails.length;
+  },
+});
+
 // Delete a thumbnail (with ownership verification)
 export const deleteThumbnail = mutation({
   args: { id: v.id("thumbnails") },

@@ -34,8 +34,8 @@ export async function POST(request: NextRequest): Promise<NextResponse<FaceSwapR
             );
         }
 
-        // Check credits
-        const creditCheck = await convex.query(api.users.hasCredits);
+        // Check credits (using clerkUserId since ConvexHttpClient doesn't have auth context)
+        const creditCheck = await convex.query(api.users.hasCreditsForUser, { clerkUserId: userId });
         if (!creditCheck.hasCredits) {
             return NextResponse.json(
                 { success: false, error: `Insufficient credits. You need ${creditCheck.required} credits but have ${creditCheck.available}. Please upgrade your plan.`, model: FACESWAP_MODEL.name },
@@ -137,9 +137,9 @@ export async function POST(request: NextRequest): Promise<NextResponse<FaceSwapR
         console.log(`Face Swap completed: ${imageUrl}`);
         console.log(`Execution time: ${data.executionTime}ms`);
 
-        // Deduct credits after successful face swap
+        // Deduct credits after successful face swap (using clerkUserId since ConvexHttpClient doesn't have auth context)
         try {
-            await convex.mutation(api.users.deductCredits);
+            await convex.mutation(api.users.deductCreditsForUser, { clerkUserId: userId });
             console.log('[Face Swap] Credits deducted successfully');
         } catch (creditError) {
             console.error('[Face Swap] Failed to deduct credits:', creditError);

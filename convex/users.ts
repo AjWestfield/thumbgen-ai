@@ -62,7 +62,7 @@ export const getUserByClerkId = query({
   },
 });
 
-// Check if user has enough credits
+// Check if user has enough credits (uses auth context)
 export const hasCredits = query({
   args: {},
   handler: async (ctx) => {
@@ -88,7 +88,28 @@ export const hasCredits = query({
   },
 });
 
-// Deduct credits (called after successful operation)
+// Check if user has enough credits (for API routes using ConvexHttpClient)
+export const hasCreditsForUser = query({
+  args: { clerkUserId: v.string() },
+  handler: async (ctx, args) => {
+    const user = await ctx.db
+      .query("users")
+      .withIndex("by_clerk_user_id", (q) => q.eq("clerkUserId", args.clerkUserId))
+      .first();
+
+    const available = user?.credits || 0;
+
+    return {
+      hasCredits: available >= CREDIT_COST,
+      required: CREDIT_COST,
+      available,
+      tier: user?.tier || null,
+      subscriptionStatus: user?.subscriptionStatus || null,
+    };
+  },
+});
+
+// Deduct credits (called after successful operation - uses auth context)
 export const deductCredits = mutation({
   args: {},
   handler: async (ctx) => {
@@ -100,6 +121,32 @@ export const deductCredits = mutation({
     const user = await ctx.db
       .query("users")
       .withIndex("by_clerk_user_id", (q) => q.eq("clerkUserId", identity.subject))
+      .first();
+
+    if (!user) {
+      throw new Error("User not found");
+    }
+
+    if (user.credits < CREDIT_COST) {
+      throw new Error("Insufficient credits");
+    }
+
+    await ctx.db.patch(user._id, {
+      credits: user.credits - CREDIT_COST,
+      updatedAt: Date.now(),
+    });
+
+    return { newBalance: user.credits - CREDIT_COST };
+  },
+});
+
+// Deduct credits (for API routes using ConvexHttpClient)
+export const deductCreditsForUser = mutation({
+  args: { clerkUserId: v.string() },
+  handler: async (ctx, args) => {
+    const user = await ctx.db
+      .query("users")
+      .withIndex("by_clerk_user_id", (q) => q.eq("clerkUserId", args.clerkUserId))
       .first();
 
     if (!user) {
@@ -142,7 +189,10 @@ export const createUserFromWebhook = mutation({
       .first();
 
     if (existingUser) {
-      // Update existing user
+      // Update existing user - ADD new credits to existing credits (for upgrades)
+      // This preserves unused credits when upgrading plans
+      const newCredits = (existingUser.credits || 0) + args.credits;
+
       await ctx.db.patch(existingUser._id, {
         stripeCustomerId: args.stripeCustomerId,
         stripeSubscriptionId: args.stripeSubscriptionId,
@@ -151,7 +201,7 @@ export const createUserFromWebhook = mutation({
         billingCycle: args.billingCycle,
         currentPeriodEnd: args.currentPeriodEnd,
         cancelAtPeriodEnd: args.cancelAtPeriodEnd,
-        credits: args.credits,
+        credits: newCredits,
         creditsPerMonth: args.creditsPerMonth,
         creditsResetAt: Date.now(),
         updatedAt: Date.now(),

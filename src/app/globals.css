@@ -323,6 +323,9 @@
 .cl-footer,
 .cl-userButtonPopoverFooter,
 a[href*="clerk.com"]:has(svg),
-div:has(> a[href*="clerk.com"]) {
+div:has(> a[href*="clerk.com"]),
+/* Target Clerk's internal footer classes */
+[class*="cl-internal"]:has(> p:first-child):has(a[href*="clerk.com"]),
+[class*="cl-internal"]:has(p[class*="cl-internal"]):has(a[href*="clerk.com"]) {
   display: none !important;
 }

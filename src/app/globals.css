@@ -323,6 +323,26 @@
    Only target elements INSIDE Clerk modals/popovers
    =========================================== */
 
+/* UserButton Popover Dropdown - Consistent dark theme */
+.cl-userButtonPopoverCard {
+  background-color: #09090b !important;
+  background: #09090b !important;
+}
+
+.cl-userButtonPopoverCard > *,
+.cl-userButtonPopoverMain,
+.cl-userButtonPopoverActions,
+.cl-userButtonPopoverActionButton,
+.cl-userPreview {
+  background-color: #09090b !important;
+  background: #09090b !important;
+}
+
+.cl-userButtonPopoverActionButton:hover {
+  background-color: #18181b !important;
+  background: #18181b !important;
+}
+
 /* Target buttons ONLY inside Clerk modal/card containers */
 .cl-modalContent .cl-formButtonPrimary,
 .cl-modalContent .cl-button,

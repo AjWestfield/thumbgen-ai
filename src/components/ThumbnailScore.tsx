@@ -1,7 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import { motion, AnimatePresence } from "framer-motion";
+import { motion } from "framer-motion";
 import { useAuth } from "@clerk/nextjs";
 import {
   Flame,
@@ -102,7 +102,7 @@ function CircularScore({ score }: { score: number }) {
   );
 }
 
-function PillarRow({ pillar, index }: { pillar: PillarScore; index: number }) {
+function PillarRow({ pillar }: { pillar: PillarScore }) {
   const [expanded, setExpanded] = useState(false);
   const bars = 6;
   const filledBars = Math.round((pillar.score / 100) * bars);
@@ -290,8 +290,8 @@ export function ThumbnailScore({ imageUrl, title, onClose, onRegenerate, isRegen
 
                 {/* Pillars */}
                 <div className="bg-white/5 rounded-xl overflow-hidden">
-                  {scoreData.pillars.map((pillar, index) => (
-                    <PillarRow key={pillar.name} pillar={pillar} index={index} />
+                  {scoreData.pillars.map((pillar) => (
+                    <PillarRow key={pillar.name} pillar={pillar} />
                   ))}
                 </div>
 

@@ -357,8 +357,16 @@ export function YouTubePreview({ searchQuery, userThumbnailUrl, similarVideos, o
     );
 }
 
+interface VideoComponentProps {
+    video: YouTubeVideo & { thumbnailUrl?: string };
+    isUserVideo: boolean;
+    handleImageError: (videoId: string) => void;
+    formatDuration: (seconds: number) => string;
+    formatViewCount: (count: number) => string;
+}
+
 // Extracted for Home Grid
-function VideoCard({ video, isUserVideo, handleImageError, formatDuration, formatViewCount }: any) {
+function VideoCard({ video, isUserVideo, handleImageError, formatDuration, formatViewCount }: VideoComponentProps) {
     return (
         <div className="flex flex-col gap-3 group cursor-pointer">
             {/* Thumbnail */}
@@ -427,7 +435,7 @@ function VideoCard({ video, isUserVideo, handleImageError, formatDuration, forma
 }
 
 // Extracted for Watch Sidebar
-function VideoRow({ video, isUserVideo, handleImageError, formatDuration, formatViewCount }: any) {
+function VideoRow({ video, isUserVideo, handleImageError, formatDuration, formatViewCount }: VideoComponentProps) {
     return (
         <div className={cn(
             "flex gap-2 group cursor-pointer p-2 rounded-xl hover:bg-[#272727] transition-colors",

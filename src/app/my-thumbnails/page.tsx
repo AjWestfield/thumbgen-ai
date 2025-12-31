@@ -1,11 +1,11 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, Suspense } from "react";
 import { useQuery, useMutation } from "convex/react";
 import { useUser } from "@clerk/nextjs";
 import { api } from "../../../convex/_generated/api";
 import Image from "next/image";
-import { Trash2, Download, Calendar, Sparkles, Eye, Pencil, CheckCircle } from "lucide-react";
+import { Trash2, Download, Calendar, Sparkles, Eye, Pencil, CheckCircle, Loader2 } from "lucide-react";
 import { useRouter, useSearchParams } from "next/navigation";
 import { Button } from "@/components/ui/button";
 import { Id } from "../../../convex/_generated/dataModel";
@@ -153,7 +153,7 @@ function ThumbnailCard({
   );
 }
 
-export default function MyThumbnailsPage() {
+function MyThumbnailsContent() {
   const router = useRouter();
   const searchParams = useSearchParams();
   const { user, isLoaded: isUserLoaded } = useUser();
@@ -430,5 +430,23 @@ export default function MyThumbnailsPage() {
         )}
       </main>
     </div>
+  );
+}
+
+// Loading fallback for Suspense
+function LoadingFallback() {
+  return (
+    <div className="min-h-screen bg-black flex items-center justify-center">
+      <Loader2 className="w-8 h-8 text-red-500 animate-spin" />
+    </div>
+  );
+}
+
+// Wrapper with Suspense for useSearchParams
+export default function MyThumbnailsPage() {
+  return (
+    <Suspense fallback={<LoadingFallback />}>
+      <MyThumbnailsContent />
+    </Suspense>
   );
 }

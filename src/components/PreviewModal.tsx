@@ -238,7 +238,7 @@ export function PreviewModal({ thumbnailUrl, onClose, onSelectLayout, generatedM
                                         Watch Page
                                     </h3>
                                     <p className={`text-zinc-500 text-sm mt-1 transition-colors ${!showThumbnailLoading && 'group-hover:text-zinc-400'}`}>
-                                        The "Up Next" sidebar position. Checks relevancy and suggestion performance.
+                                        The &quot;Up Next&quot; sidebar position. Checks relevancy and suggestion performance.
                                     </p>
                                 </div>
                             </button>

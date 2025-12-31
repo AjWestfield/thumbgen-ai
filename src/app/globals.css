@@ -318,14 +318,74 @@
   }
 }
 
-/* Hide Clerk "Secured by Clerk" branding */
-.cl-footerAction,
-.cl-footer,
-.cl-userButtonPopoverFooter,
-a[href*="clerk.com"]:has(svg),
-div:has(> a[href*="clerk.com"]),
-/* Target Clerk's internal footer classes */
-[class*="cl-internal"]:has(> p:first-child):has(a[href*="clerk.com"]),
-[class*="cl-internal"]:has(p[class*="cl-internal"]):has(a[href*="clerk.com"]) {
-  display: none !important;
+/* ===========================================
+   CLERK COMPONENT STYLING OVERRIDES
+   Override Clerk's red/primary buttons to zinc
+   =========================================== */
+
+/* Target ALL Clerk primary/action buttons */
+.cl-formButtonPrimary,
+.cl-button,
+.cl-avatarImageActionsUpload,
+.cl-profileSectionPrimaryButton,
+.cl-userButtonPopoverActionButton,
+.cl-actionCard,
+button[class*="cl-"][class*="primary"],
+button[class*="cl-"][class*="Primary"],
+button[class*="cl-formButton"],
+[class*="cl-"][class*="button"]:not([class*="secondary"]):not([class*="ghost"]) {
+  background-color: #3f3f46 !important;
+  background: #3f3f46 !important;
+  border-color: #52525b !important;
+  color: white !important;
+}
+
+/* Hover states for Clerk buttons */
+.cl-formButtonPrimary:hover,
+.cl-button:hover,
+.cl-avatarImageActionsUpload:hover,
+.cl-profileSectionPrimaryButton:hover,
+button[class*="cl-"][class*="primary"]:hover,
+button[class*="cl-"][class*="Primary"]:hover,
+button[class*="cl-formButton"]:hover {
+  background-color: #52525b !important;
+  background: #52525b !important;
+  border-color: #71717a !important;
+}
+
+/* Focus states */
+.cl-formButtonPrimary:focus,
+.cl-button:focus,
+button[class*="cl-"][class*="primary"]:focus {
+  background-color: #52525b !important;
+  box-shadow: 0 0 0 2px #3f3f46 !important;
+}
+
+/* Override any inline styles Clerk might add */
+[class*="cl-"] button[style*="background"],
+[class*="cl-"][style*="background"] {
+  background-color: #3f3f46 !important;
+  background: #3f3f46 !important;
+}
+
+/* Specific override for profile section action buttons */
+[class*="cl-profileSection"] button,
+[class*="cl-profile"] button[class*="cl-"] {
+  background-color: #3f3f46 !important;
+  background: #3f3f46 !important;
+  border-color: #52525b !important;
+  color: white !important;
+}
+
+[class*="cl-profileSection"] button:hover,
+[class*="cl-profile"] button[class*="cl-"]:hover {
+  background-color: #52525b !important;
+  background: #52525b !important;
+}
+
+/* Override CSS custom properties Clerk uses for primary color */
+[class*="cl-"] {
+  --cl-color-primary: #3f3f46 !important;
+  --cl-primary: #3f3f46 !important;
+  --color-primary: #3f3f46 !important;
 }

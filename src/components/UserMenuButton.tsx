@@ -23,23 +23,25 @@ export function UserMenuButton() {
 
   // Format plan and credits for display in menu
   // Distinguish between: loading (undefined), no auth/user (null), has data (object)
-  const getDisplayText = () => {
-    if (user === undefined) return "Loading...";
-    if (!user) return "View subscription";
+  const planName = user?.tier ? capitalize(user.tier) : null;
+  const credits = typeof user?.credits === "number" ? user.credits : 0;
 
-    const planName = user.tier ? capitalize(user.tier) : null;
-    const credits = typeof user.credits === "number" ? user.credits : 0;
+  // Build display text - show plan if available
+  const displayText = user === undefined
+    ? "Loading..."
+    : !user
+      ? "View subscription"
+      : planName
+        ? `${planName} • ${credits.toLocaleString()} credits`
+        : `${credits.toLocaleString()} credits`;
 
-    if (planName) {
-      return `${planName} • ${credits.toLocaleString()} credits`;
-    }
-    return `${credits.toLocaleString()} credits`;
-  };
-
-  const displayText = getDisplayText();
+  // Create a unique key to force UserButton to re-render when user data changes
+  // This ensures the label updates when tier/credits change
+  const userButtonKey = `user-btn-${user?.tier || 'none'}-${user?.credits || 0}`;
 
   return (
     <UserButton
+      key={userButtonKey}
       appearance={{
         elements: {
           avatarBox: "w-8 h-8",

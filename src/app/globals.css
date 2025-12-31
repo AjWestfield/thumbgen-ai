@@ -323,6 +323,22 @@
    Override Clerk's red/primary buttons to zinc
    =========================================== */
 
+/* CRITICAL: Override Tailwind arbitrary value classes that Clerk adds */
+.bg-\[\#FF0000\],
+button.bg-\[\#FF0000\],
+[class*="cl-"].bg-\[\#FF0000\],
+.cl-profileSectionPrimaryButton.bg-\[\#FF0000\] {
+  background-color: #3f3f46 !important;
+  background: #3f3f46 !important;
+}
+
+.hover\:bg-\[\#FF0000\]\/90:hover,
+button.hover\:bg-\[\#FF0000\]\/90:hover,
+[class*="cl-"].hover\:bg-\[\#FF0000\]\/90:hover {
+  background-color: #52525b !important;
+  background: #52525b !important;
+}
+
 /* Target ALL Clerk primary/action buttons */
 .cl-formButtonPrimary,
 .cl-button,
@@ -388,4 +404,20 @@ button[class*="cl-"][class*="primary"]:focus {
   --cl-color-primary: #3f3f46 !important;
   --cl-primary: #3f3f46 !important;
   --color-primary: #3f3f46 !important;
+}
+
+/* Hide "Secured by Clerk" branding */
+.cl-internal-b3fm6y,
+[class*="cl-"] a[href*="clerk.com"],
+[class*="cl-"] a[href*="go.clerk.com"],
+.cl-footer,
+.cl-footerAction,
+[class*="cl-footer"],
+[class*="cl-powered"],
+[class*="cl-internal"] a[href*="clerk"] {
+  display: none !important;
+  visibility: hidden !important;
+  opacity: 0 !important;
+  height: 0 !important;
+  overflow: hidden !important;
 }

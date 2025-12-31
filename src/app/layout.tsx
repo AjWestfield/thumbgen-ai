@@ -84,6 +84,10 @@ export default function RootLayout({
               footerActionLink: "hidden",
               footerPages: "hidden",
               footerPagesLink: "hidden",
+              // Additional selectors to hide "Secured by Clerk" branding
+              internal: "hidden",
+              poweredBy: "hidden",
+              "cl-internal-b3fm6y": "hidden",
             },
             variables: {
               // Use zinc as primary instead of red for Clerk's UI elements

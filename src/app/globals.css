@@ -317,3 +317,12 @@
     box-shadow: 0 0 50px rgba(220, 38, 38, 0.6);
   }
 }
+
+/* Hide Clerk "Secured by Clerk" branding */
+.cl-footerAction,
+.cl-footer,
+.cl-userButtonPopoverFooter,
+a[href*="clerk.com"]:has(svg),
+div:has(> a[href*="clerk.com"]) {
+  display: none !important;
+}

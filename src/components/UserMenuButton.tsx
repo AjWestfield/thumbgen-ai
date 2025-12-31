@@ -10,19 +10,33 @@ import {
 import { SubscriptionPage } from "./account/SubscriptionPage";
 import { DangerZonePage } from "./account/DangerZonePage";
 
+// Capitalize first letter of tier name
+function capitalize(str: string): string {
+  return str.charAt(0).toUpperCase() + str.slice(1);
+}
+
 export function UserMenuButton() {
   const { isSignedIn } = useUser();
 
   // Skip queries if not signed in to avoid auth errors
   const user = useQuery(api.users.getCurrentUser, isSignedIn ? undefined : "skip");
 
-  // Format credits for display in menu
+  // Format plan and credits for display in menu
   // Distinguish between: loading (undefined), no auth/user (null), has data (object)
-  const creditsText = user === undefined
-    ? "Loading..."
-    : typeof user?.credits === "number"
-      ? `${user.credits.toLocaleString()} credits`
-      : "View subscription";
+  const getDisplayText = () => {
+    if (user === undefined) return "Loading...";
+    if (!user) return "View subscription";
+
+    const planName = user.tier ? capitalize(user.tier) : null;
+    const credits = typeof user.credits === "number" ? user.credits : 0;
+
+    if (planName) {
+      return `${planName} • ${credits.toLocaleString()} credits`;
+    }
+    return `${credits.toLocaleString()} credits`;
+  };
+
+  const displayText = getDisplayText();
 
   return (
     <UserButton
@@ -39,10 +53,10 @@ export function UserMenuButton() {
         },
       }}
     >
-      {/* Custom Menu Items - Shows credits at top */}
+      {/* Custom Menu Items - Shows plan and credits */}
       <UserButton.MenuItems>
         <UserButton.Action
-          label={creditsText}
+          label={displayText}
           labelIcon={<CreditCard className="w-4 h-4" />}
           open="subscription"
         />

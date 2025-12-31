@@ -113,3 +113,21 @@ export const listUsers = query({
     return await ctx.db.query("users").collect();
   },
 });
+
+// Debug auth - check what identity info is available
+export const debugAuth = query({
+  args: {},
+  handler: async (ctx) => {
+    const identity = await ctx.auth.getUserIdentity();
+    if (!identity) {
+      return { authenticated: false, error: "No identity found" };
+    }
+    return {
+      authenticated: true,
+      subject: identity.subject,
+      issuer: identity.issuer,
+      email: identity.email,
+      tokenIdentifier: identity.tokenIdentifier,
+    };
+  },
+});

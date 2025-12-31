@@ -189,10 +189,8 @@ export const createUserFromWebhook = mutation({
       .first();
 
     if (existingUser) {
-      // Update existing user - ADD new credits to existing credits (for upgrades)
-      // This preserves unused credits when upgrading plans
-      const newCredits = (existingUser.credits || 0) + args.credits;
-
+      // Update existing user - SET credits to tier amount (not add)
+      // Credits are reset on new subscription, not accumulated
       await ctx.db.patch(existingUser._id, {
         stripeCustomerId: args.stripeCustomerId,
         stripeSubscriptionId: args.stripeSubscriptionId,
@@ -201,7 +199,7 @@ export const createUserFromWebhook = mutation({
         billingCycle: args.billingCycle,
         currentPeriodEnd: args.currentPeriodEnd,
         cancelAtPeriodEnd: args.cancelAtPeriodEnd,
-        credits: newCredits,
+        credits: args.credits,
         creditsPerMonth: args.creditsPerMonth,
         creditsResetAt: Date.now(),
         updatedAt: Date.now(),
@@ -340,5 +338,41 @@ export const getStripeCustomerId = query({
       .first();
 
     return user?.stripeCustomerId || null;
+  },
+});
+
+// Delete user account and all associated data (called from API route)
+export const deleteUserAccount = mutation({
+  args: { clerkUserId: v.string() },
+  handler: async (ctx, args) => {
+    // Find user
+    const user = await ctx.db
+      .query("users")
+      .withIndex("by_clerk_user_id", (q) => q.eq("clerkUserId", args.clerkUserId))
+      .first();
+
+    if (!user) {
+      console.log(`[Convex] User not found for deletion: ${args.clerkUserId}`);
+      return { deleted: false, thumbnailsDeleted: 0 };
+    }
+
+    // Delete all user's thumbnails
+    const thumbnails = await ctx.db
+      .query("thumbnails")
+      .withIndex("by_user", (q) => q.eq("userId", args.clerkUserId))
+      .collect();
+
+    for (const thumbnail of thumbnails) {
+      await ctx.db.delete(thumbnail._id);
+    }
+
+    // Delete user record
+    await ctx.db.delete(user._id);
+
+    console.log(
+      `[Convex] Deleted user ${args.clerkUserId} (${user.email}) and ${thumbnails.length} thumbnails`
+    );
+
+    return { deleted: true, thumbnailsDeleted: thumbnails.length };
   },
 });

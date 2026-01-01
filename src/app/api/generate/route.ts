@@ -7,10 +7,14 @@ const convex = new ConvexHttpClient(process.env.NEXT_PUBLIC_CONVEX_URL!);
 
 // Nano Banana Pro via WaveSpeed AI
 // Uses async mode with polling to avoid gateway timeouts
+// Two endpoints: text-to-image (no images required) and edit (requires images)
 const MODEL = {
-    id: 'google/nano-banana-pro/edit',
+    id: 'google/nano-banana-pro',
     name: 'Nano Banana Pro',
-    endpoint: 'https://api.wavespeed.ai/api/v3/google/nano-banana-pro/edit',
+    endpoints: {
+        textToImage: 'https://api.wavespeed.ai/api/v3/google/nano-banana-pro/text-to-image',
+        edit: 'https://api.wavespeed.ai/api/v3/google/nano-banana-pro/edit',
+    },
     pricing: {
         '1k': '$0.14/image',
         '2k': '$0.14/image',
@@ -172,8 +176,12 @@ export async function POST(request: NextRequest): Promise<NextResponse<GenerateR
         // Use empty string as placeholder for style transfer
         const userPrompt = prompt || '';
 
-        // Validate images for edit mode
-        if (mode === 'edit' && (!images || images.length === 0)) {
+        // Determine if this is text-to-image or edit mode based on images
+        const hasImages = images && images.length > 0;
+        const isTextToImage = mode === 'generate' || !hasImages;
+
+        // Validate: edit mode requires images
+        if (mode === 'edit' && !hasImages) {
             return NextResponse.json(
                 { success: false, error: 'At least 1 image is required for editing', prompt: userPrompt, model: MODEL.name },
                 { status: 400 }
@@ -188,8 +196,8 @@ export async function POST(request: NextRequest): Promise<NextResponse<GenerateR
             );
         }
 
-        // WaveSpeed supports up to 14 images
-        const imageInput = mode === 'generate' ? [] : images!.slice(0, 14);
+        // WaveSpeed supports up to 14 images for edit mode
+        const imageInput = hasImages ? images!.slice(0, 14) : [];
 
         // Calculate number of user images (excluding reference if present)
         // The reference image is always appended last by the frontend
@@ -198,31 +206,45 @@ export async function POST(request: NextRequest): Promise<NextResponse<GenerateR
             : imageInput.length;
 
         // Build the appropriate prompt with text placement instructions
-        const finalPrompt = mode === 'edit'
+        const finalPrompt = !isTextToImage
             ? buildPersonReplacementPrompt(userPrompt, hasReferenceImage, userImageCount)
             : `${userPrompt} ${TEXT_PLACEMENT_INSTRUCTIONS}`;
 
-        console.log(`[WaveSpeed] Mode: ${mode}, Prompt: "${userPrompt ? userPrompt.substring(0, 50) + '...' : '(auto-generated)'}"`);
+        // Select endpoint based on mode
+        const endpoint = isTextToImage ? MODEL.endpoints.textToImage : MODEL.endpoints.edit;
+
+        console.log(`[WaveSpeed] Mode: ${isTextToImage ? 'text-to-image' : 'edit'}, Prompt: "${userPrompt ? userPrompt.substring(0, 50) + '...' : '(auto-generated)'}"`);
+        console.log(`[WaveSpeed] Endpoint: ${endpoint}`);
         console.log(`[WaveSpeed] Settings: ${aspectRatio}, ${resolution}, ${outputFormat}`);
-        if (mode === 'edit') {
+        if (!isTextToImage) {
             console.log(`[WaveSpeed] Image inputs: ${imageInput.length} total (${userImageCount} user image(s), hasReference: ${hasReferenceImage})`);
             console.log(`[WaveSpeed] Image URLs:`, imageInput);
         }
 
         // WaveSpeed API request payload with async mode (poll for results)
-        const payload = {
-            prompt: finalPrompt,
-            images: imageInput,
-            aspect_ratio: aspectRatio,
-            resolution: resolution,
-            output_format: outputFormat,
-            enable_sync_mode: false, // Use async mode to avoid gateway timeout
-            enable_base64_output: false,
-        };
+        // Text-to-image doesn't need images field, edit mode does
+        const payload = isTextToImage
+            ? {
+                prompt: finalPrompt,
+                aspect_ratio: aspectRatio,
+                resolution: resolution,
+                output_format: outputFormat,
+                enable_sync_mode: false,
+                enable_base64_output: false,
+            }
+            : {
+                prompt: finalPrompt,
+                images: imageInput,
+                aspect_ratio: aspectRatio,
+                resolution: resolution,
+                output_format: outputFormat,
+                enable_sync_mode: false,
+                enable_base64_output: false,
+            };
 
         console.log('[WaveSpeed] Sending request with async mode...');
 
-        const response = await fetch(MODEL.endpoint, {
+        const response = await fetch(endpoint, {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json',
@@ -322,13 +344,14 @@ export async function GET(): Promise<NextResponse> {
         status: apiKey ? 'configured' : 'missing_api_key',
         model: MODEL,
         capabilities: {
-            modes: ['edit'],
-            description: 'Image editing using natural language prompts via WaveSpeed AI',
+            modes: ['generate', 'edit'],
+            description: 'Text-to-image generation and image editing using natural language prompts via WaveSpeed AI',
             aspectRatios: ['1:1', '2:3', '3:2', '3:4', '4:3', '4:5', '5:4', '9:16', '16:9', '21:9'],
             resolutions: ['1k', '2k', '4k'],
             outputFormats: ['png', 'jpeg'],
             maxImages: 14,
             features: [
+                'Text-to-image generation (no images required)',
                 'Natural-language context-aware editing',
                 'Async mode with reliable polling',
                 'Multilingual on-image text',
